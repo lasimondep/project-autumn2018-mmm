@@ -3,29 +3,28 @@ import os
 import threading
 import re
 import subprocess
+import json
 from pathlib import Path
 
 """ Класс генератор содержит в себе ip процесса-генератора и номер задачи (потом, возможно, список подзадач) """
 
 class Generator:
-	def __init__(self, t, ip):
+	def __init__(self, t, ip, d):
 		self.task = t;
 		self.IP = ip
-		self.cond = True;
-	def show(self):
-		return "Task {0}: Generator IP {1} {2}".format(self.task, self.IP, "works\n" if self.cond else "broken \n")
-""" метод возвращает всю информацию о генераторе """
+		self.descr = d
+		self.cond = 'works'
 
 
-Generators = {11: Generator(11, 'TestGen.py'), 2 :Generator(2,'TestGen2.py')}
+Generators = {11: Generator(11, 'TestGen.py', 'Тестовый генератор'), 2 :Generator(2,'TestGen2.py', 'Тестовый генератор 2')}
 
-
+         
 def Gens_Cond():
-	G = ''
+	data = [];
 	for i in Generators.keys():
-		G+= Generators.get(i).show()
-	return G
-
+		nd = {"Task_ID" : Generators.get(i).task, "Description" : Generators.get(i).descr, "Condition" : Generators.get(i).cond }
+		data.append(nd)
+	return data
 
 """ Request Handler """
 
@@ -37,7 +36,9 @@ class FacadeHandler(BaseHTTPRequestHandler):
 				self.send_response(200)   
 				self.send_header('request','get_tasklist') 
 				self.end_headers()          
-				self.wfile.write(Gens_Cond().encode('utf-8'))  
+				data = Gens_Cond()
+				G = json.dumps(data)
+				self.wfile.write(G.encode('utf-8'))  
 			if self.headers['request'] == 'get_task':                                                                                                 
 				id = int(self.headers['taskID'])
 				if Generators.get(id) != None:
@@ -75,7 +76,6 @@ def run(server_class=HTTPServer, handler_class=FacadeHandler):
 		print('server terminated by keyboard')
 
 if __name__ == '__main__':
-	print(Generators.keys())
 	run()
 
 		
