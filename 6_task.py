@@ -64,8 +64,6 @@ json_dict['inserts'] += [str(R1)]
 
 #f1=[st0,answer]
 #f=json.dumps(f1)
-print(json_dict)
+#print(json_dict)
 f2=json.dumps(json_dict)
 print(f2)
-with open('petuchi.json', 'w') as jout:
-    json.dump(json_dict, jout)
