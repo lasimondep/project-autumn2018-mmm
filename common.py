@@ -2,7 +2,6 @@ import pika, pickle
 
 class AMQP_client:
 	'''класс для общения между сервисами'''
-	connection = channel = 0
 	def __init__(self, Host, e_name, e_type):
 		connection = pika.BlockingConnection(pika.ConnectionParameters(host = Host))
 		channel = connection.channel()
