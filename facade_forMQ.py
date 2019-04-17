@@ -57,7 +57,7 @@ class MyClient(AMQP_client):
 		if Type == 'get_taskList':
 			data = Gens_Cond()
 			G = json.dumps(data)
-			self.send(ch, 'interface', 'fanout', 1, 'post_taskList', G)
+			self.send('interface', 'fanout', 1, 'post_taskList', G)
 		else:
 			if Type == 'get_task':
 				task_id = Data[task_id]
@@ -74,21 +74,26 @@ class MyClient(AMQP_client):
 								p.wait()
 								_fin = open('_stdout', 'rb')
 								_data = _fin.read()
-								if _data == 'Хуй соси губой тряси':
-									self.send(ch, 'interface', 'fanout', 1, 'error_post_task', _data)   
+								if _data == 'error':
+									self.send('interface', 'fanout', 1, 'error_post_task', _data)   
 								else:
-									self.send(ch, 'latex', 'fanout', 1, 'post_task', _data)
+									self.send('latex', 'fanout', 1, 'post_task', _data)
 									#self.send(ch, 'database', 'fanout', 1, 'post_task', _data)
 						except:
-							self.send(ch, 'interface', 'fanout', 1, 'error_post_task', 'Generator broken') 
+							self.send('interface', 'fanout', 1, 'error_post_task', 'Generator broken') 
 							Generators.get(task_id).cond = 'broken'
 				    else:
-				    	self.send(ch, 'interface', 'fanout', 1, 'error_post_task', 'Generator`s path invalid. Check the setup file')
+				    	self.send('interface', 'fanout', 1, 'error_post_task', 'Generator`s path invalid. Check the setup file')
 				else:
-					self.send(ch, 'interface', 'fanout', 1, 'error_post_task', 'Task is not in list')
+					self.send('interface', 'fanout', 1, 'error_post_task', 'Task is not in list')
 			else:
-				self.send(ch, 'interface', 'fanout', 1, 'error_post_task', 'Wrong request type')
+				self.send('interface', 'fanout', 1, 'error_post_task', 'Wrong request type')
 				
 
 if __name__ == '__main__':
 	client = MyClient('localhost', 'facade', 'fanout')
+	try:
+		client.start_consume()
+	except KeyboardInterrupt:
+        client.stop_consume()
+
