@@ -1,11 +1,18 @@
 from common import AMQP_client
 
-class MyClient(AMQP_client):
-	def __init__(self, Host, e_name, e_type):
-		super().__init__(Host, e_name, e_type)
-	
-	def parse(self, ch, Id, Type, Data):
-		if Type == 'get_taskList':
-			self.send(ch, 'interface', 'fanout', 1, 'post_taskList', 'Hello World!')
+class InterfaceClient(AMQP_client):
+	def parse(self, Id, Type, Data):
+		if Type == "post_taskList":
+			self.send("facade", "fanout", 2, "Thank you")
+			print("Task list:", Data)
 
-client = MyClient('localhost', 'facade', 'fanout')
+Client = InterfaceClient("localhost", "interface")
+Client.start_consume()
+print("At this time must run Django web-server")
+Client.send("facade", 1, "get_taskList")
+try:
+	while True:
+		pass
+except KeyboardInterrupt:
+	Client.stop_consume()
+	print("Close connection & stop thread")
