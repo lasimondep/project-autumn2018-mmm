@@ -1,42 +1,30 @@
 import os
-import re
 import subprocess
 import json
-from pathlib import Path
 from common import AMQP_client
+from setup import gen_set, pr_set
 
-""" Файл с настройками запуска генераторов """
-GG = open('generators.txt', 'r')
-GS = open('gensettings.txt', 'r')
-sttngs = {}
+#Generators = {10: Generator(10, 'T10.py', 'Задача №10'), 2 :Generator(2,'TestGen.py', 'Тестовый генератор 2')}
 
-for line in GS:
-	if line[0] != "#":
-		l = line.split(maxsplit = 1)
-		sttngs.setdefault( l[0], (l[1])[:-1])	
 
-GS.close()
-
-print(sttngs)
+class Generator:
+	def __init__(self, t, adr, d, c):
+		self.task = t;
+		self.ADR = adr
+		self.descr = d
+		self.cond = c
 
 Generators = {}
 
-""" Класс генератор содержит в себе ip процесса-генератора и номер задачи (потом, возможно, список подзадач) """
+for	t in gen_set.keys():
+	Generators.setdefault(t, Generator(t, gen_set[t][0], gen_set.get[t][1], gen_set.get[t][2])
 
-class Generator:
-	def __init__(self, t, ip, d):
-		self.task = t;
-		self.IP = ip
-		self.descr = d
-		self.cond = 'works'
 
-for line in GG:
-	if line[0] != '#':
-		l = line.split(maxsplit = 3)
-		Generators.setdefault(l[0], Generator(l[0], l[1], l[2]))
-
-print(Generators)
-#Generators = {10: Generator(10, 'T10.py', 'Задача №10'), 2 :Generator(2,'TestGen.py', 'Тестовый генератор 2')}
+def get_CMD(task_id):
+	adr = Generators.get(task_id).ADR
+	ext = Path(adr).suffix
+	cmd = pr_set[ext]
+	cmd.replace(_FILE, adr.replace(ext, '')) 	
 
          
 def Gens_Cond():
@@ -45,55 +33,66 @@ def Gens_Cond():
 		nd = {"Task_ID" : Generators.get(i).task, "Description" : Generators.get(i).descr, "Condition" : Generators.get(i).cond }
 		data.append(nd)
 	return data
-	                                  
+
+
+
+def call_Generator(task_id, args):
+	cmd = Generstors.get(task_id).ADR
+	if(Path(cmd).exists()):
+		try:
+			cmd = setup.get_CMD(task_id)
+			if args != "":
+				cmd = cmd + args
+			p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE)
+			p.wait()
+			_data = p.stdout.read()
+			return _data
+		except:
+			return "error: can`t open generator " + task_id 
+	else:
+		return "error: wrong path to generator: " + cmd
+	
+	
+		                                  
 """ MyClient """
 
 class MyClient(AMQP_client):
-	def __init__(self, Host, e_name, e_type):
-		super().__init__(Host, e_name, e_type)
 	
-	def parse(self, ch, Id, Type, Data):
-		rootdir = os.getcwd().replace('\\','/')
+	def process_data(self, Id, _data):
+		if _data == 'error':
+				self.send('interface', Id, 'error_post_task', _data) 
+				Generators.get(task_id).cond = 'broken'
+	
+	def post_taskList(self, Id):
+		data = Gens_Cond()
+		G = json.dumps(data)
+		self.send('interface', Id, 'post_taskList', G)
+   	
+   	def post_task(self, Id, Type, Data):
+   		task_id = Data["task_id"]
+		args = Data["args"]
+		if Generators.get(task_id) != None:
+			_data = call_Generator(task_id, args)
+			self.process_data(Id, _data)
+		else:
+			self.send('interface', Id, 'error_post_task', 'Task is not in list')	
+				
+	
+	def parse(self, Id, Type, Data):
 		if Type == 'get_taskList':
-			data = Gens_Cond()
-			G = json.dumps(data)
-			self.send('interface', 'fanout', 1, 'post_taskList', G)
+			self.post_taskList(Id)
 		else:
 			if Type == 'get_task':
-				task_id = Data[task_id]
-				args = Data[args]
-				if Generators.get(task_id) != None:
-					cmd = rootdir + '/' + Generators.get(id).IP
-					if(Path(cmd).exists()):
-						try:
-							ext = Path(cmd).suffix
-							cmd = sttngs[ext] + " " + cmd
-							if args != "":
-								cmd = cmd + args
-								p = subprocess.Popen(cmd, shell = True, stdout=subprocess.PIPE)
-								p.wait()
-								_fin = open('_stdout', 'rb')
-								_data = _fin.read()
-								if _data == 'error':
-									self.send('interface', 'fanout', 1, 'error_post_task', _data)   
-								else:
-									self.send('latex', 'fanout', 1, 'post_task', _data)
-									#self.send(ch, 'database', 'fanout', 1, 'post_task', _data)
-						except:
-							self.send('interface', 'fanout', 1, 'error_post_task', 'Generator broken') 
-							Generators.get(task_id).cond = 'broken'
-				    else:
-				    	self.send('interface', 'fanout', 1, 'error_post_task', 'Generator`s path invalid. Check the setup file')
-				else:
-					self.send('interface', 'fanout', 1, 'error_post_task', 'Task is not in list')
+				self.post_task(Id, Type, Data)
 			else:
-				self.send('interface', 'fanout', 1, 'error_post_task', 'Wrong request type')
+				self.send('interface', Id, 'error_post_task', 'Wrong request type')
 				
 
 if __name__ == '__main__':
-	client = MyClient('localhost', 'facade', 'fanout')
+	client = MyClient('localhost', 'facade')
+	client.start_consume()
 	try:
-		client.start_consume()
+		while True:
+			pass
 	except KeyboardInterrupt:
-        client.stop_consume()
-
+		client.stop_consume()
