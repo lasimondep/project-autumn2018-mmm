@@ -58,10 +58,14 @@ def call_Generator(task_id, args):
 
 class MyClient(AMQP_client):
 	
-	def process_data(self, Id, _data):
+	def process_data(self, Id, _data, task_id):
 		if _data == 'error':
 				self.send('interface', Id, 'error_post_task', _data) 
 				Generators.get(task_id).cond = 'broken'
+		else:
+			self.send('latex', Id, 'post_task', _data);
+			#to_base = [_data, task_id]
+			#self.send('database', Id, 'save_task', to_base);
 	
 	def post_taskList(self, Id):
 		data = Gens_Cond()
@@ -73,7 +77,7 @@ class MyClient(AMQP_client):
 		args = Data["args"]
 		if Generators.get(task_id) != None:
 			_data = call_Generator(task_id, args)
-			self.process_data(Id, _data)
+			self.process_data(Id, _data, task_id)
 		else:
 			self.send('interface', Id, 'error_post_task', 'Task is not in list')	
 				
