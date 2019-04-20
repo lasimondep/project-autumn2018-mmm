@@ -9,16 +9,21 @@ def is_int(str):
     except ValueError:
         return False
 va = sys.argv
-print(va)
+#print(va)
+
 if len(va)==1:
     #print("Nice!")
     R = random.randint(71, 121)
 else:
-    if is_int(va[1]) and 50<int(va[1])<150:
-        #print(va[1])
-        R=int(va[1])
+    if int(va[1].split("=")[0]) == 1:
+        l = (va[1].split("="))[1]
+        if is_int(l) and 50<int(l)<150:
+            #print(va[1])
+            R=int(l)
+        else:
+            #print("ERROR")
+            sys.exit("Хуй соси,губой тряси")
     else:
-        #print("ERROR")
         sys.exit("Хуй соси,губой тряси")
 #R=97
 R1=R
@@ -53,14 +58,15 @@ str6="\nПолученная таким образом запись (в ней �
 str7="\nУкажите такое наименьшее число N, для которого результат работы алгоритма больше "+str(R1)+". В ответе это число запишите в десятичной системе счисления."
 st0=str1+str2+str3+str4+str5+str6+str7
 #print(st0,answer)
-json_dict = {'text' : [], 'answers': [], 'inserts' : []}
+json_dict = {'text' : [], 'answers': [], 'inserts' : {}}
 str8="\nУкажите такое наименьшее число N, для которого результат работы алгоритма больше "
 str9=". В ответе это число запишите в десятичной системе счисления."
-
 json_dict['text'] += [(str1+str2+str3+str4+str5+str6+str8)]
+json_dict['text'] += ["insert1"]
 json_dict['text'] += [str9]
 json_dict['answers'] += [str(answer)]
-json_dict['inserts'] += [str(R1)]
+json_dict['inserts'].update({"insert1":str(R1)})
+print(json_dict['inserts'])
 
 #f1=[st0,answer]
 #f=json.dumps(f1)
