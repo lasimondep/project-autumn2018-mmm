@@ -52,7 +52,12 @@ def call_Generator(task_id, args):
 	else:
 		return "error: wrong path to generator: " + cmd
 	
-	
+def get_args(a):
+	args = ""
+	for k in a:
+		args += " " + str(k) + "=\"" + str(a[k]) + "\""
+	return args
+				
 		                                  
 """ MyClient """
 
@@ -74,7 +79,7 @@ class MyClient(AMQP_client):
    	
    	def post_task(self, Id, Type, Data):
    		task_id = Data["task_id"]
-		args = Data["args"]
+		args = get_args(Data["args"])
 		if Generators.get(task_id) != None:
 			_data = call_Generator(task_id, args)
 			self.process_data(Id, _data, task_id)
