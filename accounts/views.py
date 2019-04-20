@@ -48,6 +48,31 @@ class Homeview(TemplateView):
                 texty = fortry.cleaned_data
                 formMy = formset_factory(tempform, extra=5)
                 fortry= MyForm()
+                return render(request, self.template_name, {'texty': texty, 'fortry': fortry, "formMy": formMy})
+
+
+        elif request.method == 'POST' and "manyfields1" in request.POST:
+            formMyy = formset_factory(tempform, extra=5)
+            formMysec = formMyy(request.POST)
+            if formMysec.is_valid():
+                data = formMysec.cleaned_data
+                formMysec = formset_factory(tempform, extra=5)
+                return render(request, self.template_name, {"formMysec":formMysec,"data":data})
+        elif request.method == 'POST' and "manyfields2" in request.POST:
+            formMyy = formset_factory(tempform, extra=9)
+            formMythi = formMyy(request.POST)
+            if formMythi.is_valid():
+                mata = formMythi.cleaned_data
+                formMythi = formset_factory(tempform, extra=9)
+                return render(request, self.template_name, {"formMythi":formMythi})
+        elif request.method == 'POST' and "manyfields3" in request.POST:
+            formMyy = formset_factory(tempform, extra=9)
+            formMyfou = formMyy(request.POST)
+            if formMyfou.is_valid():
+                mata = formMyfou.cleaned_data
+                formMyfou = formset_factory(tempform, extra=9)
+                return render(request, self.template_name, {"formMyfou":formMyfou,"mata":mata})
+
         else:
             fortry= MyForm()
 

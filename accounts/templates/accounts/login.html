@@ -27,7 +27,8 @@ MathJax.Hub.Config({
 </script>
 </head>
 
-<body><form method="post">
+<body>
+    <form method="post">
          {% csrf_token %}
         {{ fortry|safe }}
      <p>
@@ -35,13 +36,16 @@ MathJax.Hub.Config({
      </p>
     </form>
 <br></br>
-     <form method="post">
+
+
+
+    <form method="post">
          {% csrf_token %}
         {{ formMy.management_form }}
         <div class = "wrap">
         {% for form in formMy %}
             <div class = "forms">
-            <script type="math/tex">asfasf</script>{{ form }}<script type="math/tex">dasfasf</script>
+            {{ form }}
             </div>
         {% endfor %}
         </div>
@@ -51,7 +55,51 @@ MathJax.Hub.Config({
      </p>
     </form>
 
+
+
+    <form method="post">
+         {% csrf_token %}
+        {{ formMysec.management_form }}
+        <div class = "wrap">
+        {% for form in formMysec %}
+            <div class = "forms">
+            <script type="math/tex">asfasf</script>{{ form }}<script type="math/tex">dasfasf</script>
+            </div>
+        {% endfor %}
+        </div>
+
+     <p>
+         <button type='submit' name="manyfields2" >submit</button>
+     </p>
+    </form>
+
+    <form method="post">
+         {% csrf_token %}
+        {{ formMythi.management_form }}
+        <div class = "wrap">
+        {% for form in formMythi %}
+            <div class = "forms">
+            {{ form }}
+            </div>
+        {% endfor %}
+        </div>
+
+     <p>
+         <button type='submit' name="manyfields3" >submit</button>
+     </p>
+    </form>
+
+
+
+
      {{ texty }}
+    {{ data }}
+
+
+
+
+
+
     <!--
     <div class="container">
     <h1>Home</h1>
