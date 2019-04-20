@@ -3,6 +3,8 @@ from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.contrib.auth.models import User
 from accounts.models import Post
+from django.forms.formsets import formset_factory
+from accounts.forms import tempform
 import json
 from http.client import HTTPConnection
 from django.forms import modelformset_factory
@@ -31,9 +33,25 @@ class Homeview(TemplateView):
     template_name='accounts/login.html'
 
 
+    #def get(self,request):
 
+    def get(self, request):
 
+        fortry = MyForm()
+        formMy = formset_factory(tempform, extra=5)
+        return render(request, self.template_name, {"fortry": fortry,})
 
+    def post(self, request):
+        if request.method == 'POST' and "choizy" in request.POST:
+            fortry = MyForm(request.POST)
+            if fortry.is_valid():
+                texty = fortry.cleaned_data
+                formMy = formset_factory(tempform, extra=5)
+                fortry= MyForm()
+        else:
+            fortry= MyForm()
+
+        return render(request, self.template_name, {'texty': texty, 'fortry':fortry, "formMy":formMy})
 
 
 

@@ -7,10 +7,52 @@ MathJax.Hub.Config({
 </script>
 
 <head>
+     <style>
+         .forms {
+             all: inherit;
+             float: left;
+             width: auto;
+             position: relative;
+             padding: 20px;
+         }
+         .wrap {
+            overfloat: auto;
+             width: 100%;
+         }
+
+    </style>
+    <meta charset="utf-8">
     <script type="text/javascript" async
   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
 </head>
+
+<body><form method="post">
+         {% csrf_token %}
+        {{ fortry|safe }}
+     <p>
+         <button type='submit' name="choizy" >submit</button>
+     </p>
+    </form>
+<br></br>
+     <form method="post">
+         {% csrf_token %}
+        {{ formMy.management_form }}
+        <div class = "wrap">
+        {% for form in formMy %}
+            <div class = "forms">
+            <script type="math/tex">asfasf</script>{{ form }}<script type="math/tex">dasfasf</script>
+            </div>
+        {% endfor %}
+        </div>
+
+     <p>
+         <button type='submit' name="manyfields1" >submit</button>
+     </p>
+    </form>
+
+     {{ texty }}
+    <!--
     <div class="container">
     <h1>Home</h1>
         {{ form }}
@@ -22,8 +64,10 @@ MathJax.Hub.Config({
         <p>{{ tasklist }}</p>
 <script type="math/tex; mode=display">
       {{text}}
+      >
 </script>
 
 
     </div>
-
+-->
+</body>
