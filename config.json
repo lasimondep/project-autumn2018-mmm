@@ -1,0 +1,18 @@
+[
+{
+    "title": "ЕГЭ",
+    "content" : [{
+    				"title" : "Математика",
+    				"content" :[{
+    								"task_id" : "test", 
+    								"description" : "Тестовая задача"
+    							}]
+    			}]
+},
+{
+	"test" : "TestGen.py"
+},
+{
+	".py" : "python _FILE.py", ".exe" : "_FILE"
+}
+]

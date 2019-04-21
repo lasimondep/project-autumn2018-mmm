@@ -1,2 +1,0 @@
-##||extension||cmd args
-.py python
