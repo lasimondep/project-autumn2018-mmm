@@ -2,42 +2,45 @@ import os
 import subprocess
 import json
 from common import AMQP_client
-from setup import gen_set, pr_set
 
-#Generators = {10: Generator(10, 'T10.py', 'Задача №10'), 2 :Generator(2,'TestGen.py', 'Тестовый генератор 2')}
+gen_tree = gen_path = pr_set = {}
 
+with open("config.json") as json_file:
+	lst = json.load(json_file)
+	gen_tree = lst[0]
+	gen_path = lst[1]
+	pr_set = lst[2]
 
-class Generator:
-	def __init__(self, t, adr, d, c):
-		self.task = t;
-		self.ADR = adr
-		self.descr = d
-		self.cond = c
+		
 
-Generators = {}
-
-for	t in gen_set.keys():
-	Generators.setdefault(t, Generator(t, gen_set[t][0], gen_set.get[t][1], gen_set.get[t][2])
+def dfs(task_id, root, data):
+	if "title" in root:
+		for next_node in root["content"]:
+			res = dfs(task_id, next_node, data)
+			if res != None:
+				break
+		if res != None:
+			return {"title" : root["title"], "content" : res}
+		else:
+			return None
+	else:
+		if root["task_id"] == task_id:
+			root.setdefault("json_data", data)
+			return root;
+		else:
+			return None
 
 
 def get_CMD(task_id):
-	adr = Generators.get(task_id).ADR
+	adr = gen_path[task_id]      #!!!!!!
 	ext = Path(adr).suffix
-	cmd = pr_set[ext]
-	cmd.replace(_FILE, adr.replace(ext, '')) 	
+	cmd = pr_set[ext]   #!!!!!!
+	cmd.replace("_FILE", adr.replace(ext, "")) 	
 
          
-def Gens_Cond():
-	data = [];
-	for i in Generators.keys():
-		nd = {"Task_ID" : Generators.get(i).task, "Description" : Generators.get(i).descr, "Condition" : Generators.get(i).cond }
-		data.append(nd)
-	return data
-
-
 
 def call_Generator(task_id, args):
-	cmd = Generstors.get(task_id).ADR
+	cmd = gen_path[task_id] #!!!!!!!
 	if(Path(cmd).exists()):
 		try:
 			cmd = setup.get_CMD(task_id)
@@ -66,19 +69,17 @@ class MyClient(AMQP_client):
 	def process_data(self, Id, _data, task_id):
 		if _data == 'error':
 				self.send('interface', Id, 'error_post_task', _data) 
-				Generators.get(task_id).cond = 'broken'
 		else:
 			self.send('latex', Id, 'post_task', _data);
-			#to_base = [_data, task_id]
-			#self.send('database', Id, 'save_task', to_base);
+			to_base = dfs(task_id, gen_tree, _data)
+			self.send('database', Id, 'save_task', to_base);
 	
 	def post_taskList(self, Id):
-		data = Gens_Cond()
-		G = json.dumps(data)
+		G = json.dumps(gen_tree)
 		self.send('interface', Id, 'post_taskList', G)
-   	
-   	def post_task(self, Id, Type, Data):
-   		task_id = Data["task_id"]
+		   	
+	def post_task(self, Id, Type, Data):
+		task_id = Data["task_id"]
 		args = get_args(Data["args"])
 		if Generators.get(task_id) != None:
 			_data = call_Generator(task_id, args)
