@@ -1,10 +1,9 @@
 import json
 import re
+import os
 
 from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, \
     Plot, Figure, Matrix, Alignat
-from pylatex.utils import italic
-import os
 
 from common import AMQP_client
 
@@ -12,8 +11,11 @@ from common import AMQP_client
 class MyClient(AMQP_client):
     def parse(self, Id, Type, Data):
         if Type == "post_task":
-            tex_string = func(Data)
-            self.send('interface', Id, 'post_tex', tex_string)
+            json_out = {}
+            tex_lst = func(Data)
+            json_out.update({'non_tex': Data, 'tex': tex_lst})
+            self.send('interface', Id, 'post_tex', json_out)
+
 
 client = MyClient('localhost', 'latex')
 client.start_consume()
@@ -25,30 +27,31 @@ except KeyboardInterrupt:
     client.stop_consume()
     print("Close connection & stop thread")
 
-def fill_document(doc, json_in, flag):
-    pattern = r'insert\d'
-    pat = ''
-    for i in json_in['text']:
-        case = re.findall(pattern, i)
-        #print(type(case))
-        for i in case:
-            pat = i
-        if i != pat:
-            doc.append(i + ' ')
-        else:
-            doc.append(json_in['inserts'][i] + ' ')
 
-    if flag:
-        for i in json_in['answers']:
-            case = re.findall(pattern, i)
-            # print(type(case))
-            for i in case:
-                pat = i
-            if i != pat:
-                doc.append(i + ' ')
-            else:
-                doc.append(json_in['inserts'][i] + ' ')
+def fill_document(doc, json_in, flag):
+    pattern1 = r'insert\d{,100}'
+    pattern2 = r'text\d{,100}'
+    pat = ''
+    for i in range(len(doc)):
+        for key in json_in[i]['text']:
+            match = re.fullmatch(pattern2, key)
+            if match:
+                for text in json_in[i]['text'][key]:
+                    match1 = re.findall(pattern1, text)
+                    if match1:
+                        doc[i].append(json_in[i]['inserts'][text] + ' ')
+                    else:
+                        doc[i].append(text + ' ')
+
+        if flag:
+            for text in json_in[i]['answers']:
+                match1 = re.findall(pattern1, text)
+                if match1:
+                    doc[i].append(json_in[i]['inserts'][text] + ' ')
+                else:
+                    doc[i].append(text + ' ')
     return
+
 
 def modify_str(str):
     str_list = str.split()
@@ -65,41 +68,55 @@ def modify_str(str):
             interface_str += i + ' '
     return interface_str
 
+
 def func(data):
     json_in = json.loads(data)
+    doc = []
+    tex = []
+    str = ''
     flag = True
 
-    geometry_options = {"tmargin": "1cm", "lmargin": "10cm"}
-    doc = Document(geometry_options=geometry_options)
+    geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+    for i in range(len(json_in)):
+        doc.append(Document(geometry_options=geometry_options))
     fill_document(doc, json_in, flag)
+    for i in range(len(json_in)):
+        tex.append(doc[i].dumps())
+        tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
+        tex[i] = modify_str(tex[i])
+        #print(str)
+    return tex
 
-    tex = doc.dumps()
-    tex = r'\usepackage[english, russian]{babel}' + '\n' + tex
-    str = modify_str(tex)
-    with open('output.tex', 'w') as tex_out:
-        for line in tex:
-            tex_out.write(line)
-    # doc.generate_pdf('full', clean_tex=False)
-    return str
 
 # if __name__ == '__main__':
-#     json_in = {'text': ['Сложите число', 'insert1', 'с числом', 'insert2', '. Ответ запишите в виде двоичного кода.\n'],
-#                'answers': ['Ответ:', 'insert3'],
-#                'inserts': {'insert1': '322', 'insert2': '228', 'insert3': '550'}
-#     }
-#     tex = ''
+#     json_in = [{
+#         'text': {'text1': ['Сложите число', 'insert1', 'с числом', 'insert2', '. Ответ запишите в виде двоичного кода.']},
+#         'answers': ['Ответ', 'insert3'],
+#         'inserts': {'insert1': '322',
+#                     'insert2': '228',
+#                     'insert3': '550'}},
+#         {
+#             'text': {'text1': ['Сложите число', 'insert1', 'с числом', 'insert2',
+#                                '. Ответ запишите в виде двоичного кода.']},
+#             'answers': ['Ответ', 'insert3'],
+#             'inserts': {'insert1': '228',
+#                         'insert2': '322',
+#                         'insert3': '550'}
+#     }]
+#     doc = []
+#     tex = []
 #     str = ''
 #     flag = True
 #
-#     geometry_options = {"tmargin": "1cm", "lmargin": "10cm"}
-#     doc = Document(geometry_options=geometry_options)
+#     geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+#     for i in range(len(json_in)):
+#         doc.append(Document(geometry_options=geometry_options))
 #     fill_document(doc, json_in, flag)
-#
-#     tex = doc.dumps()
-#     tex = r'\usepackage[english, russian]{babel}' +'\n' + tex
-#     str = modify_str(tex)
-#     #print(tex)
-#     print(str)
+#     for i in range(len(json_in)):
+#         tex.append(doc[i].dumps())
+#         tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
+#         str = modify_str(tex[i])
+#         print(str)
 #     with open('output.tex', 'w') as tex_out:
 #         for line in tex:
 #             tex_out.write(line)
