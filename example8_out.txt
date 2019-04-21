@@ -1,8 +1,8 @@
 #Пример 8 задания егэ
 dict{
 	'text': {'text1': ['Определите, что будет напечатано в результате работы следующего фрагмента программы:'],
-			 'table1': {'raw1': {'col1': ['Python'], 'col2': ['Pascal'], 'col3': ['C++']},
-						'raw2': {'col1': ['s = ', 'insert1', '\nk = ', 'insert2', '\nwhile k < ', 'insert3', ':\n\tk += ', 'insert4', '\n\ts += k', '\nprint(s)'],
+			 'table1': {'row1': {'col1': ['Python'], 'col2': ['Pascal'], 'col3': ['C++']},
+						'row2': {'col1': ['s = ', 'insert1', '\nk = ', 'insert2', '\nwhile k < ', 'insert3', ':\n\tk += ', 'insert4', '\n\ts += k', '\nprint(s)'],
 								 'col2': ['var k, s: integer;\n begin', '\n\ts:=', 'insert1', ';\n\tk:=', 'insert2', '\n\twhile k < ', 'insert3', 'do begin', '\n\t\tk:=k+', 'insert4', ';\n\t\ts:=s+k;', '\n\tend;\n\twrite(s);\nend.'],
 								 'col3': ['#include<iostream> \nusing namespace std; \nint main(){ \n\tint s, k; \n\ts = ', 'insert1', ', k = ', 'insert2', '; \n\twhile(k < ', 'insert3', '){ \n\t\tk = k + ', 'insert4', '; \n\t\ts = s + k; \n\t} \n\tcout << s << endl; \n\treturn 0; \n}']
 						}							
