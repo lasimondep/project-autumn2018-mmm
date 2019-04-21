@@ -14,6 +14,7 @@ class MyClient(AMQP_client):
             json_out = {}
             tex_lst = func(Data)
             json_out.update({'non_tex': Data, 'tex': tex_lst})
+            json_out = json.dumps(json_out)
             self.send('interface', Id, 'post_tex', json_out)
 
 
