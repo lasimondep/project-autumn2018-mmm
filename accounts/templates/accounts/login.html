@@ -1,0 +1,135 @@
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: { linebreaks: { automatic: true } },
+  "HTML-CSS": { linebreaks: { automatic: true } },
+         SVG: { linebreaks: { automatic: true } }
+});
+</script>
+
+<head>
+     <style>
+         .forms {
+             all: inherit;
+             float: left;
+             width: auto;
+             position: relative;
+             padding: 20px;
+         }
+         .wrap {
+            overfloat: auto;
+             width: 100%;
+         }
+    </style>
+    <meta charset="utf-8">
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+
+<body>
+    <form method="post">
+         {% csrf_token %}
+        {{ fortry }}
+    {% if check4 != "1" %}
+    {% if check3 != "1" %}
+        {% if check2 != "1" %}
+     <p>
+         <button type='submit' name="choizy" >submit</button>
+     </p>
+        {% endif %}
+        {% endif %}
+    {% endif %}
+    </form>
+<br></br>
+
+
+
+    <form method="post">
+         {% csrf_token %}
+        {{ formMy.management_form }}
+        <div class = "wrap">
+        {% for form in formMy %}
+            <div class = "forms">
+            {{ form }}
+            </div>
+        {% endfor %}
+        </div>
+    {% if check1 == "1" %}
+             <p>
+         <button type='submit' name="manyfields1" >submit</button>
+     </p>
+    {% endif %}
+
+    </form>
+
+
+
+    <form method="post">
+         {% csrf_token %}
+        {{ formMysec.management_form }}
+        <div class = "wrap">
+        {% for form in formMysec %}
+            <div class = "forms">
+
+            <script type="math/tex">{{ Prime.forloop.counter }} </script>{{ form }}<script type="math/tex">d</script>
+            </div>
+        {% endfor %}
+        </div>
+    {% if check2 == "1" %}
+     <p>
+         <button type='submit' name="manyfields2" >submit</button>
+     </p>
+        {% endif %}
+    </form>
+
+    <form method="post">
+         {% csrf_token %}
+        {{ formMythi.management_form }}
+        <div class = "wrap">
+        {% for form in formMythi %}
+            <div class = "forms">
+            {{ form }}
+            </div>
+        {% endfor %}
+        </div>
+        {% if check3 == "1" %}
+     <p>
+         <button type='submit' name="manyfields3" >submit</button>
+     </p>
+            {% else %}
+            {% if check4 == "1" %}
+                <p>
+         <button type='submit' name="manyfields3" >submit</button>
+     </p>
+                {% endif %}
+    {% endif %}
+    </form>
+
+
+
+
+    {{ texty }}
+    {{ data }}
+
+
+
+
+
+
+    <!--
+    <div class="container">
+    <h1>Home</h1>
+        {{ form }}
+    <form method="post">
+        {% csrf_token %}
+        {{ formy }}
+        <button type='submit' >submit</button>
+    </form>
+        <p>{{ tasklist }}</p>
+<script type="math/tex; mode=display">
+      {{text}}
+      >
+</script>
+    </div>
+-->
+</body>
