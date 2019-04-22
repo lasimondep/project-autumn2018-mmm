@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import subprocess
 import json
 from common import AMQP_client
@@ -12,7 +13,7 @@ with open("config.json") as json_file:
 	pr_set = lst[2]
 
 		
-
+print(gen_path)
 def dfs(task_id, root, data):
 	if "title" in root:
 		for next_node in root["content"]:
@@ -25,7 +26,7 @@ def dfs(task_id, root, data):
 			return None
 	else:
 		if root["task_id"] == task_id:
-			root.setdefault("json_data", data)
+			root.setdefault("data_json", data)
 			return root;
 		else:
 			return None
@@ -33,9 +34,14 @@ def dfs(task_id, root, data):
 
 def get_CMD(task_id):
 	adr = gen_path[task_id]      #!!!!!!
+	print("adr =", adr)
 	ext = Path(adr).suffix
+	print("ext =", repr(ext))
+	print("pr_set =", repr(pr_set))
 	cmd = pr_set[ext]   #!!!!!!
-	cmd.replace("_FILE", adr.replace(ext, "")) 	
+	print("cmd in get_CMD =", cmd)
+	cmd = cmd.replace("_FILE", adr)
+	return cmd
 
          
 
@@ -43,9 +49,10 @@ def call_Generator(task_id, args):
 	cmd = gen_path[task_id] #!!!!!!!
 	if(Path(cmd).exists()):
 		try:
-			cmd = setup.get_CMD(task_id)
+			cmd = get_CMD(task_id)
 			if args != "":
 				cmd = cmd + args
+			print("cmd =", cmd)
 			p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE)
 			p.wait()
 			_data = p.stdout.read()
@@ -70,10 +77,13 @@ class MyClient(AMQP_client):
 		if _data == 'error':
 				self.send('interface', Id, 'error_post_task', _data)
 		else:
-			_tdata = json.dumps([json.loads(_data)])
-			self.send('latex', Id, 'post_task', _tdata);
 			to_base = dfs(task_id, gen_tree, _data)
+			print("to_base =", to_base)
 			self.send('database', Id, 'save_task', to_base);
+			print("_data =", repr(_data))
+			_tdata = json.dumps([json.loads(_data)])
+			print("_tdata =", repr(_tdata))
+			self.send('latex', Id, 'post_task', _tdata);
 	
 	def post_taskList(self, Id):
 		G = json.dumps(gen_tree)
@@ -81,8 +91,10 @@ class MyClient(AMQP_client):
 		   	
 	def post_task(self, Id, Type, Data):
 		task_id = Data["task_id"]
+		print("Data", Data)
+		print("task_id",task_id)
 		args = get_args(Data["args"])
-		if Generators.get(task_id) != None:
+		if task_id in gen_path.keys():
 			_data = call_Generator(task_id, args)
 			self.process_data(Id, _data, task_id)
 		else:
@@ -102,8 +114,10 @@ class MyClient(AMQP_client):
 if __name__ == '__main__':
 	client = MyClient('localhost', 'facade')
 	client.start_consume()
+	print("Facade started consuming")
 	try:
 		while True:
 			pass
 	except KeyboardInterrupt:
 		client.stop_consume()
+		print("Close connection & stop thread")

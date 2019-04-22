@@ -1,13 +1,22 @@
-from common import AMQP_Client
+from common import AMQP_client
 import sqlite3
 
 
-class DatabaseClient(AMQP_Client):
+class DatabaseClient(AMQP_client):
 	def parse(self, Id, Type, Data):
 		if Type == "save_task":
 			add_task(Data)
 
 _DB_NAME = "db_task.sqlite3"
+
+
+def db_create(cmd):
+	connection = sqlite3.connect(_DB_NAME)
+	cursor = connection.cursor()
+	cursor.execute(cmd)
+	connection.commit()
+	connection.close()
+	
 
 def db_insert(cmd, **kwarg):
 	print("db_insert", kwarg)
@@ -79,18 +88,33 @@ def add_task(raw_ie):
 		parent_id = add_subfolder(parent_id, it["title"])
 		it = it["content"]
 
+#	print("it[description] =", it["description"])
 	add_task_type(it["task_id"], parent_id, it["description"])
 
 	inner_id = db_insert("""INSERT INTO tasks (task_id)
 							VALUES (:task_id)""",
 							task_id=it["task_id"])
 	json_source = "./storage/json/t" + str(inner_id) + ".json"
-	with open(json_source, "w") as jout:
-		json.dump(it["data_json"], jout)
+	with open(json_source, "wb") as jout:
+		jout.write(it["data_json"])
 	db_update("""UPDATE tasks
 				SET json_source = :json_source
 				WHERE inner_id = :inner_id""",
 				json_source=json_source, inner_id=inner_id)
+
+db_create('''PRAGMA encoding = \"UTF-8\"''')
+db_create("""CREATE TABLE IF NOT EXISTS task_tree (
+			tree_id INTEGER PRIMARY KEY,
+			parent_id INTEGER,
+			title TEXT NOT NULL)""")
+db_create("""CREATE TABLE IF NOT EXISTS task_type (
+			task_id TEXT PRIMARY KEY,
+			parent_id INTEGER NOT NULL,
+			description TEXT NOT NULL)""")
+db_create("""CREATE TABLE IF NOT EXISTS tasks (
+			inner_id INTEGER PRIMARY KEY,
+			task_id TEXT NOT NULL,
+			json_source TEXT)""")
 
 
 Client = DatabaseClient("localhost", "database")

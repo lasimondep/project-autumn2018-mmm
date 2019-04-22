@@ -10,9 +10,9 @@
     			}]
 },
 {
-	"test" : "./TestGen.py"
+	"test" : "C:\\src\\spbu\\practice\\project\\git\\TestGen.py"
 },
 {
-	".py" : "python _FILE.py", ".exe" : "_FILE"
+	".py" : "python _FILE", ".exe" : "_FILE"
 }
 ]
