@@ -1,0 +1,10 @@
+# Executable
+*.exe
+
+# Database
+*.sqlite3
+
+# Python precached
+/__pycache__/*
+/*/__pycache__/*
+/*/*/__pycache__/*
