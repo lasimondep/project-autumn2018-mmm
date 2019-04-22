@@ -10,7 +10,7 @@
     			}]
 },
 {
-	"test" : "TestGen.py"
+	"test" : "./TestGen.py"
 },
 {
 	".py" : "python _FILE.py", ".exe" : "_FILE"

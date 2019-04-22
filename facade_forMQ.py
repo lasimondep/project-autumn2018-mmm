@@ -68,9 +68,10 @@ class MyClient(AMQP_client):
 	
 	def process_data(self, Id, _data, task_id):
 		if _data == 'error':
-				self.send('interface', Id, 'error_post_task', _data) 
+				self.send('interface', Id, 'error_post_task', _data)
 		else:
-			self.send('latex', Id, 'post_task', _data);
+			_tdata = json.dumps([json.loads(_data)])
+			self.send('latex', Id, 'post_task', _tdata);
 			to_base = dfs(task_id, gen_tree, _data)
 			self.send('database', Id, 'save_task', to_base);
 	
