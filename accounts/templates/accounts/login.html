@@ -19,7 +19,6 @@ MathJax.Hub.Config({
             overfloat: auto;
              width: 100%;
          }
-
     </style>
     <meta charset="utf-8">
     <script type="text/javascript" async
@@ -30,10 +29,16 @@ MathJax.Hub.Config({
 <body>
     <form method="post">
          {% csrf_token %}
-        {{ fortry|safe }}
+        {{ fortry }}
+    {% if check4 != "1" %}
+    {% if check3 != "1" %}
+        {% if check2 != "1" %}
      <p>
          <button type='submit' name="choizy" >submit</button>
      </p>
+        {% endif %}
+        {% endif %}
+    {% endif %}
     </form>
 <br></br>
 
@@ -49,10 +54,12 @@ MathJax.Hub.Config({
             </div>
         {% endfor %}
         </div>
-
-     <p>
+    {% if check1 == "1" %}
+             <p>
          <button type='submit' name="manyfields1" >submit</button>
      </p>
+    {% endif %}
+
     </form>
 
 
@@ -63,14 +70,16 @@ MathJax.Hub.Config({
         <div class = "wrap">
         {% for form in formMysec %}
             <div class = "forms">
-            <script type="math/tex">asfasf</script>{{ form }}<script type="math/tex">dasfasf</script>
+
+            <script type="math/tex">{{ Prime.forloop.counter }} </script>{{ form }}<script type="math/tex">d</script>
             </div>
         {% endfor %}
         </div>
-
+    {% if check2 == "1" %}
      <p>
          <button type='submit' name="manyfields2" >submit</button>
      </p>
+        {% endif %}
     </form>
 
     <form method="post">
@@ -83,16 +92,23 @@ MathJax.Hub.Config({
             </div>
         {% endfor %}
         </div>
-
+        {% if check3 == "1" %}
      <p>
          <button type='submit' name="manyfields3" >submit</button>
      </p>
+            {% else %}
+            {% if check4 == "1" %}
+                <p>
+         <button type='submit' name="manyfields3" >submit</button>
+     </p>
+                {% endif %}
+    {% endif %}
     </form>
 
 
 
 
-     {{ texty }}
+    {{ texty }}
     {{ data }}
 
 
@@ -114,8 +130,6 @@ MathJax.Hub.Config({
       {{text}}
       >
 </script>
-
-
     </div>
 -->
 </body>

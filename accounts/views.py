@@ -10,6 +10,11 @@ from http.client import HTTPConnection
 from django.forms import modelformset_factory
 from accounts.forms import MyForm
 from accounts.forms import HomeForm
+from django import template
+from django.template.defaultfilters import stringfilter
+#from accounts.common import AMQP_client
+import time
+register = template.Library()
 
 
 def request_mediator(host, head):
@@ -20,25 +25,59 @@ def request_mediator(host, head):
     rhead, rdata = response.getheaders(), response.read()
     return rhead, rdata
 
-class GenReqID:
-    _ID = 0
-    def next(self):
-        GenReqID._ID += 1
-        return GenReqID._ID
+"""
+class InterfaceClient(AMQP_client):
+    _REQUEST_TIMEOUT, _QUEUE_TIMEOUT = 0.5, 10
+
+    class TimeOutExcept(Exception):
+        pass
+
+    class GenReqID:
+        _ID = 0
+
+        def next():
+            InterfaceClient.GenReqID._ID += 1
+            return InterfaceClient.GenReqID._ID
+
+    def __init__(self, Host, e_name, e_type="fanout"):
+        super(InterfaceClient, self).__init__(Host, e_name, e_type)
+        self.ans_queue = list()
+
+    def send_request(self, to_name, Type, Data=None, to_type="fanout"):
+        Id = InterfaceClient.GenReqID.next()
+        self.send(to_name, Id, Type, Data, to_type)
+        time.sleep(InterfaceClient._REQUEST_TIMEOUT)
+        if Id not in map(lambda x: x["Id"], self.ans_queue):
+            raise TimeoutError()
+        else:
+            res = dict(filter(lambda x: x["Id"] == Id, self.ans_queue))
+            return {"Type": res["Type"], "Data": res["Data"]}
+
+    def parse(self, Id, Type, Data):
+        self.ans_queue = list(filter(lambda x: time.time() - x["time"] < InterfaceClient._QUEUE_TIMEOUT, self.ans_queue))
+        self.ans_queue.append({"time": time.time(), "Id": Id, "Type": Type, "Data": Data})
 
 
+Client = InterfaceClient("localhost", "interface")
+Client.start_consume()
 
-
+"""
 class Homeview(TemplateView):
     template_name='accounts/login.html'
-
-
-    #def get(self,request):
-
+    """
+    @register.filter
+    def index(List, i):
+        return List[int(i)]
+    """
     def get(self, request):
-
+        '''
+        try:
+            Type, Data = Client.send_request("facade", "get_taskList")
+        except InterfaceClient.TimeOutExcept:
+            print("TImeOutError")
+        else:
+        '''
         fortry = MyForm()
-        formMy = formset_factory(tempform, extra=5)
         return render(request, self.template_name, {"fortry": fortry,})
 
     def post(self, request):
@@ -48,7 +87,8 @@ class Homeview(TemplateView):
                 texty = fortry.cleaned_data
                 formMy = formset_factory(tempform, extra=5)
                 fortry= MyForm()
-                return render(request, self.template_name, {'texty': texty, 'fortry': fortry, "formMy": formMy})
+                check1 = "1"
+                return render(request, self.template_name, {'texty': texty, 'fortry': fortry, "formMy": formMy,"check1": check1})
 
 
         elif request.method == 'POST' and "manyfields1" in request.POST:
@@ -57,26 +97,32 @@ class Homeview(TemplateView):
             if formMysec.is_valid():
                 data = formMysec.cleaned_data
                 formMysec = formset_factory(tempform, extra=5)
-                return render(request, self.template_name, {"formMysec":formMysec,"data":data})
+                check2 = "1"
+                Prime = ['string1', 'string2', 'string3', 'string3', 'string3']
+                return render(request, self.template_name, {"formMysec":formMysec,"data":data, "check2":check2,"Prime":Prime})
         elif request.method == 'POST' and "manyfields2" in request.POST:
             formMyy = formset_factory(tempform, extra=9)
             formMythi = formMyy(request.POST)
             if formMythi.is_valid():
                 mata = formMythi.cleaned_data
                 formMythi = formset_factory(tempform, extra=9)
-                return render(request, self.template_name, {"formMythi":formMythi})
+                check3 = "1"
+                return render(request, self.template_name, {"formMythi":formMythi,"check3": check3})
         elif request.method == 'POST' and "manyfields3" in request.POST:
             formMyy = formset_factory(tempform, extra=9)
-            formMyfou = formMyy(request.POST)
-            if formMyfou.is_valid():
-                mata = formMyfou.cleaned_data
-                formMyfou = formset_factory(tempform, extra=9)
-                return render(request, self.template_name, {"formMyfou":formMyfou,"mata":mata})
+            formMythi = formMyy(request.POST)
+            if formMythi.is_valid():
+                mata = formMythi.cleaned_data
+                formMythi = formset_factory(tempform, extra=9)
+                check4 = "1"
+
+                return render(request, self.template_name, {"formMythi":formMythi,"mata":mata,"check4":check4})
 
         else:
             fortry= MyForm()
 
         return render(request, self.template_name, {'texty': texty, 'fortry':fortry, "formMy":formMy})
+
 
 
 
