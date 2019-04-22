@@ -12,10 +12,14 @@ class MyClient(AMQP_client):
     def parse(self, Id, Type, Data):
         if Type == "post_task":
             json_out = {}
-            tex_lst = func(Data)
+            tex_lst = func(Data, Type)
             json_out.update({'non_tex': Data, 'tex': tex_lst})
             json_out = json.dumps(json_out)
             self.send('interface', Id, 'post_tex', json_out)
+        if Type == "get_pdf":
+            json_tex = func(Data, Type)
+            json_tex = json.dumps(json_tex)
+            self.send('interface', Id, 'get_pdf', json_tex)
 
 
 client = MyClient('localhost', 'latex')
@@ -70,23 +74,52 @@ def modify_str(str):
     return interface_str
 
 
-def func(data):
+def func(data, type):
     json_in = json.loads(data)
-    doc = []
-    tex = []
-    str = ''
     flag = True
-
+    tex = ''
     geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
-    for i in range(len(json_in)):
-        doc.append(Document(geometry_options=geometry_options))
-    fill_document(doc, json_in, flag)
-    for i in range(len(json_in)):
-        tex.append(doc[i].dumps())
-        tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
-        tex[i] = modify_str(tex[i])
-        #print(str)
+    if type == "post_task":
+        doc = []
+        tex = []
+        for i in range(len(json_in)):
+            doc.append(Document(geometry_options=geometry_options))
+        fill_document(doc, json_in, flag)
+        for i in range(len(json_in)):
+            tex.append(doc[i].dumps())
+            tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
+            tex[i] = modify_str(tex[i])
+    elif type == 'get_pdf':
+        geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+        doc = Document(geometry_options=geometry_options)
+        pdf_generate(doc, json_in, flag)
+        tex = r'\usepackage[english, russian]{babel}' + '\n' + doc.dumps()
     return tex
+
+
+def pdf_generate(doc, json_in, flag):
+    pattern1 = r'insert\d{,100}'
+    pattern2 = r'text\d{,100}'
+    for i in range(len(json_in)):
+        doc.append('Задача' + str(i+1) + ':\n')
+        for key in json_in[i]['text']:
+            match = re.fullmatch(pattern2, key)
+            if match:
+                for text in json_in[i]['text'][key]:
+                    match1 = re.findall(pattern1, text)
+                    if match1:
+                        doc.append(json_in[i]['inserts'][text] + ' ')
+                    else:
+                        doc.append(text + ' ')
+
+        if flag:
+            for text in json_in[i]['answers']:
+                match1 = re.findall(pattern1, text)
+                if match1:
+                    doc.append(json_in[i]['inserts'][text] + ' ')
+                else:
+                    doc.append(text + ' ')
+    return
 
 
 # if __name__ == '__main__':
@@ -104,21 +137,27 @@ def func(data):
 #                         'insert2': '322',
 #                         'insert3': '550'}
 #     }]
-#     doc = []
+#     #doc = []
 #     tex = []
-#     str = ''
 #     flag = True
 #
 #     geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
-#     for i in range(len(json_in)):
-#         doc.append(Document(geometry_options=geometry_options))
-#     fill_document(doc, json_in, flag)
-#     for i in range(len(json_in)):
-#         tex.append(doc[i].dumps())
-#         tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
-#         str = modify_str(tex[i])
-#         print(str)
+#
+#     # for i in range(len(json_in)):
+#     #     doc.append(Document(geometry_options=geometry_options))
+#
+#     doc = Document(geometry_options=geometry_options)
+#     pdf_generate(doc, json_in, flag)
+#     tex_str = r'\usepackage[english, russian]{babel}' + '\n'+ doc.dumps()
+#
+#     # for i in range(len(json_in)):
+#     #     tex.append(doc[i].dumps())
+#     #     tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
+#     #     str = modify_str(tex[i])
+#     #     print(str)
+#
+#     print(tex_str)
 #     with open('output.tex', 'w') as tex_out:
-#         for line in tex:
+#         for line in tex_str:
 #             tex_out.write(line)
 #     #doc.generate_pdf('full', clean_tex=False)
