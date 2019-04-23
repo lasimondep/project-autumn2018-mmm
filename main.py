@@ -2,33 +2,113 @@ import json
 import re
 import os
 
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, \
-    Plot, Figure, Matrix, Alignat
+from pylatex import *
 
 from common import AMQP_client
 
 
-def modify_str(str):
-    str_list = str.split()
-    #print(str_list)
+def modify_str(str1, Type):
+    pattern1 = r'insert\d{,100}'
+    str1 = str1.replace('%', '')
+    str1 = str1.replace(r'\normalsize', '')
+    str1 = str1.replace(r'\newline', '\n')
+    str1_list = str1.split()
     interface_str = ''
     flag = False
-    for i in str_list:
-        if i =='\\begin{document}%':
-            flag = True
-            continue
-        if flag:
-            if i == '\\end{document}':
-                break
-            interface_str += i + ' '
+
+    if Type == "get_task_text":
+        temp_str = ''
+        interface_str = []
+        for i in str1_list:
+            if i == '\\begin{document}%':
+                flag = True
+                continue
+            if flag:
+                match1 = re.findall(pattern1, i)
+                if match1:
+                    interface_str += [temp_str]
+                    temp_str = ''
+                elif i == '\\end{document}':
+                    interface_str += [temp_str]
+                    break
+                else:
+                    temp_str += i + ' '
+    if Type == "get_pdf" or Type == "post_task":
+        for i in str1_list:
+            if i == '\\begin{document}':
+                flag = True
+                continue
+            if flag:
+                if i == '\\end{document}':
+                    break
+                interface_str += i + ' '
     return interface_str
+
+
+def func(data, Type):
+    json_in = data
+    flag = True
+    tex = ''
+    geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+
+    if Type == "post_task":
+        doc = []
+        tex = []
+
+        for i in range(len(json_in)):
+            doc.append(Document(geometry_options=geometry_options))
+            doc[i].preamble.append(Command('usepackage[english, russian]', 'babel'))
+        fill_document(doc, json_in, flag)
+
+        for i in range(len(json_in)):
+            tex.append(doc[i].dumps())
+            tex[i] = modify_str(tex[i], Type)
+    elif Type == 'get_pdf':
+        geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+        doc = Document(geometry_options=geometry_options)
+        doc.preamble.append(Command('usepackage[english, russian]', 'babel'))
+        pdf_generate(doc, json_in, flag)
+        tex = doc.dumps()
+    elif Type == 'get_task_text':
+        doc = []
+        tex = []
+
+        for i in range(len(json_in)):
+            doc.append(Document(geometry_options=geometry_options))
+            doc[i].preamble.append(Command('usepackage[english, russian]', 'babel'))
+        without_inserts(doc, json_in)
+
+        for i in range(len(json_in)):
+            tex.append(doc[i].dumps())
+            tex[i] = modify_str(tex[i], Type)
+    return tex
+
+
+def without_inserts(doc, json_in):
+    pattern1 = r'insert\d{,100}'
+    pattern2 = r'text\d{,100}'
+
+    for i in range(len(json_in)):
+        for key in json_in[i]['text']:
+            match = re.fullmatch(pattern2, key)
+            if match:
+                for text in json_in[i]['text'][key]:
+                    match1 = re.findall(pattern1, text)
+                    if match1:
+                        doc[i].append('(' + json_in[i]['inserts'][text] + ') ')
+                    doc[i].append(text + ' ')
+    return
 
 
 def pdf_generate(doc, json_in, flag):
     pattern1 = r'insert\d{,100}'
     pattern2 = r'text\d{,100}'
+    pattern3 = r'table\d{,100}'
+    pattern4 = r'row\d{,100}'
+    pattern5 = r'col\d{,100}'
+
     for i in range(len(json_in)):
-        doc.append('Задача' + str(i+1) + ':\n')
+        doc.append('\n\tЗадача' + str(i+1) + ':\n')
         for key in json_in[i]['text']:
             match = re.fullmatch(pattern2, key)
             if match:
@@ -52,9 +132,8 @@ def pdf_generate(doc, json_in, flag):
 def fill_document(doc, json_in, flag):
     pattern1 = r'insert\d{,100}'
     pattern2 = r'text\d{,100}'
-    pat = ''
-    for i in range(len(doc)):
-        print("json_in[i] =", json_in[i])
+
+    for i in range(len(json_in)):
         for key in json_in[i]['text']:
             match = re.fullmatch(pattern2, key)
             if match:
@@ -75,50 +154,36 @@ def fill_document(doc, json_in, flag):
     return
 
 
-def func(data, type):
-    json_in = json.loads(data)
-    flag = True
-    tex = ''
-    geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
-    if type == "post_task":
-        doc = []
-        tex = []
-        for i in range(len(json_in)):
-            doc.append(Document(geometry_options=geometry_options))
-        fill_document(doc, json_in, flag)
-        for i in range(len(json_in)):
-            tex.append(doc[i].dumps())
-            tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
-            tex[i] = modify_str(tex[i])
-            #print(tex[i])
-    elif type == 'get_pdf':
-        geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
-        doc = Document(geometry_options=geometry_options)
-        pdf_generate(doc, json_in, flag)
-        tex = r'\usepackage[english, russian]{babel}' + '\n' + doc.dumps()
-    return tex
-
-
-class MyClient(AMQP_client):
+class TexClient(AMQP_client):
     def parse(self, Id, Type, Data):
         if Type == "post_task":
             json_out = {}
-            tex_lst = func(Data, Type)
-            print(tex_lst)
-            json_out.update({'non_tex': Data, 'tex': tex_lst})
-            print("json_out = ", json_out, '\n\n')
+            tex_lst = []
+            for i in range(len(Data)):
+                tex_lst.append(json.loads(Data[i]))
+            dct = tex_lst
+            tex_lst = func(tex_lst, Type)
+            json_out.update({'non_tex': dct, 'tex': tex_lst})
             json_out = json.dumps(json_out)
-            print("json_out = ", json_out, '\n\n')
             self.send('interface', Id, 'post_tex', json_out)
+
         if Type == "get_pdf":
             json_tex = func(Data, Type)
             json_tex = json.dumps(json_tex)
             self.send('interface', Id, 'get_pdf', json_tex)
 
+        if Type == "get_task_text":
+            json_text = []
+            for i in range(len(Data)):
+                json_text.append(json.loads(Data[i]))
+            tex_lst = func(json_text, Type)
+            json_out = json.dumps(tex_lst)
+            self.send('interface', Id, 'tex_task_text', json_out)
 
-client = MyClient('localhost', 'latex')
+
+client = TexClient('localhost', 'latex')
 client.start_consume()
-print('Tex started consuming')
+print('I`m start')
 try:
     while True:
         pass
@@ -128,41 +193,29 @@ except KeyboardInterrupt:
 
 
 # if __name__ == '__main__':
-#     json_in = [{
+#     json_text = [{
 #         'text': {'text1': ['Сложите число', 'insert1', 'с числом', 'insert2', '. Ответ запишите в виде двоичного кода.']},
 #         'answers': ['Ответ', 'insert3'],
 #         'inserts': {'insert1': '322',
 #                     'insert2': '228',
-#                     'insert3': '550'}},
-#         {
-#             'text': {'text1': ['Сложите число', 'insert1', 'с числом', 'insert2',
-#                                '. Ответ запишите в виде двоичного кода.']},
-#             'answers': ['Ответ', 'insert3'],
-#             'inserts': {'insert1': '228',
-#                         'insert2': '322',
-#                         'insert3': '550'}
+#                     'insert3': '550'}}, {
+#         'text': {'text1': ['Сложите число', 'insert1', 'с числом', 'insert2', '. Ответ запишите в виде двоичного кода.']},
+#         'answers': ['Ответ', 'insert3'],
+#         'inserts': {'insert1': '228',
+#                     'insert2': '322',
+#                     'insert3': '550'}
 #     }]
-#     #doc = []
 #     tex = []
 #     flag = True
+#     Type = "post_task"
 #
-#     geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+#     tex_lst = func(json_text, Type)
+#     json_out = json.dumps(tex_lst)
 #
-#     # for i in range(len(json_in)):
-#     #     doc.append(Document(geometry_options=geometry_options))
+#     for i in tex_lst:
+#         print(i)
 #
-#     doc = Document(geometry_options=geometry_options)
-#     pdf_generate(doc, json_in, flag)
-#     tex_str = r'\usepackage[english, russian]{babel}' + '\n'+ doc.dumps()
-#
-#     # for i in range(len(json_in)):
-#     #     tex.append(doc[i].dumps())
-#     #     tex[i] = r'\usepackage[english, russian]{babel}' + '\n' + tex[i]
-#     #     str = modify_str(tex[i])
-#     #     print(str)
-#
-#     print(tex_str)
 #     with open('output.tex', 'w') as tex_out:
-#         for line in tex_str:
-#             tex_out.write(line)
-#     #doc.generate_pdf('full', clean_tex=False)
+#         for i in tex_lst:
+#             tex_out.write(i)
+#             tex_out.write('\n')
