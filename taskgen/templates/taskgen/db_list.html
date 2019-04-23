@@ -1,0 +1,11 @@
+{% if db_list %}
+<form action="{% url 'taskgen:load' %}", method="post">
+{% csrf_token %}
+{% for task_type in db_list %}
+	<input type="checkbox" name="{{ task_type.pk }}">{{ task_type.pk }}: {{ task_type.description }}<br>
+{% endfor %}
+<input type="submit" value="Загрузить выбранные">
+</form>
+{% else %}
+	<p>Нет доступных задач в базе данных</p>
+{% endif %}
