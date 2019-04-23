@@ -20,13 +20,14 @@ def modify_str(str1, Type):
         temp_str = ''
         interface_str = []
         for i in str1_list:
-            if i == '\\begin{document}%':
+            if i == '\\begin{document}':
                 flag = True
                 continue
             if flag:
                 match1 = re.findall(pattern1, i)
                 if match1:
-                    interface_str += [temp_str]
+                    str1 = re.findall(pattern1, i)[0]
+                    interface_str += [temp_str] + [i.replace(str1, '')]
                     temp_str = ''
                 elif i == '\\end{document}':
                     interface_str += [temp_str]
@@ -95,8 +96,9 @@ def without_inserts(doc, json_in):
                 for text in json_in[i]['text'][key]:
                     match1 = re.findall(pattern1, text)
                     if match1:
-                        doc[i].append('(' + json_in[i]['inserts'][text] + ') ')
-                    doc[i].append(text + ' ')
+                        doc[i].append(json_in[i]['inserts'][text]+ text)
+                    else:
+                        doc[i].append(text + ' ')
     return
 
 
@@ -207,15 +209,18 @@ except KeyboardInterrupt:
 #     }]
 #     tex = []
 #     flag = True
-#     Type = "post_task"
+#     Type = "get_task_text"
 #
 #     tex_lst = func(json_text, Type)
 #     json_out = json.dumps(tex_lst)
+#
+#     print(tex_lst)
 #
 #     for i in tex_lst:
 #         print(i)
 #
 #     with open('output.tex', 'w') as tex_out:
 #         for i in tex_lst:
-#             tex_out.write(i)
-#             tex_out.write('\n')
+#             for line in i:
+#                 tex_out.write(line)
+#                 tex_out.write('\n')
