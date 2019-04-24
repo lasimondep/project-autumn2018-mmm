@@ -9,46 +9,37 @@ def is_int(str):
     except ValueError:
         return False
 va = sys.argv
-#print(va)
 
 if len(va)==1:
-    #print("Nice!")
     R = random.randint(71, 121)
 else:
     if int(va[1].split("=")[0]) == 1:
         l = (va[1].split("="))[1]
         if is_int(l) and 50<int(l)<150:
-            #print(va[1])
             R=int(l)
         else:
-            #print("ERROR")
-            sys.exit("Хуй соси,губой тряси")
+            sys.exit("error")
     else:
-        sys.exit("Хуй соси,губой тряси")
-#R=97
+        sys.exit("error")
 R1=R
 R+=1
 r=(bin(R))[2:]
-#print("R: "+r)
 s=0
 for i in range(len(r)-2):
     s=s+int(r[i])
-#print(s)
+
 flag=" "
 while flag!="Ok":
     if r[-2:]=="00":
         if is_int(R/4) and s%2==0:
-            #print(R/4)
             answer=R/4
             flag = "Ok"
     elif r[-2:]=="10" and s%2==1:
         if is_int((R-2)/4):
-            #print((R-2)/4)
             answer=(R-2)/4
             flag = "Ok"
     R+=1
     r=(bin(R))[2:]
-#print(bin(21))
 str1="На вход алгоритма подаётся натуральное число N. Алгоритм строит по нему новое число R следующим образом."
 str2="\n\t1.	Строится двоичная запись числа N."
 str3="\n\t2.	К этой записи дописываются справа ещё два разряда по следующему правилу:"
@@ -57,19 +48,17 @@ str5="\n\t\tб)	над этой записью производятся те ж�
 str6="\nПолученная таким образом запись (в ней на два разряда больше, чем в записи исходного числа N) является двоичной записью искомого числа R."
 str7="\nУкажите такое наименьшее число N, для которого результат работы алгоритма больше "+str(R1)+". В ответе это число запишите в десятичной системе счисления."
 st0=str1+str2+str3+str4+str5+str6+str7
-#print(st0,answer)
-json_dict = {'text' : [], 'answers': [], 'inserts' : {}}
+json_dict = {'text' : {}, 'answers': {}, 'inserts' : {}}
 str8="\nУкажите такое наименьшее число N, для которого результат работы алгоритма больше "
 str9=". В ответе это число запишите в десятичной системе счисления."
-json_dict['text'] += [(str1+str2+str3+str4+str5+str6+str8)]
-json_dict['text'] += ["insert1"]
-json_dict['text'] += [str9]
-json_dict['answers'] += [str(answer)]
+text1 = [(str1+str2+str3+str4+str5+str6+str8)]
+text1 += ["insert1"]
+text1 += [str9]
+json_dict['text'].update({"text1":text1})
+json_dict['answers'].update({"text1":["Ответ","insert2"]})
 json_dict['inserts'].update({"insert1":str(R1)})
+json_dict['inserts'].update({"insert2":str(answer)})
 print(json_dict['inserts'])
 
-#f1=[st0,answer]
-#f=json.dumps(f1)
-#print(json_dict)
 f2=json.dumps(json_dict)
 print(f2)
