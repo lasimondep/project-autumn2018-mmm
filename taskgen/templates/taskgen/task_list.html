@@ -1,0 +1,20 @@
+{% load mptt_tags %}
+<form action="{% url 'taskgen:statements' %}", method="post">
+{% csrf_token %}
+<ul>
+	{% recursetree db_list %}
+		<li>
+			{% if not node.is_leaf_node %}
+				{{ node.description }}
+				<ul class="children">
+					{{ children }}
+				</ul>
+			{% else %}
+				<input type="checkbox" name="{{ node.pk }}" id="cb{{ node.pk }}">
+				<label for="cb{{ node.pk }}">{{ node.description }}</label>
+			{% endif %}
+		</li>
+	{% endrecursetree %}
+</ul>
+<input type="submit" value="Загрузить выбранные">
+</form>

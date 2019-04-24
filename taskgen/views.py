@@ -1,40 +1,47 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from django.template.defaulttags import register
+from collections import deque
+import json
 
-from .models import TaskType, Task
+from .models import TaskTree, TaskType, Task
+import taskgen.communications as comm
 
 # Create your views here.
-
-@register.filter
-def get_item(dictionary, key):
-	return dictionary.get(key)
 
 def index(request):
 	return render(request, 'taskgen/index.html')
 
 def generate_list(request):
-	return HttpResponse('TODO запрос списка задач из фасада')
+	try:
+		Type, Data = comm.interface_client.send_request('facade', 'get_taskList')
+	except comm.InterfaceClient.TimeOutExcept:
+		return HttpResponse('Фасад временно недоступен')
+	else:
+		TaskTree.objects.all().delete()
+		tree = TaskTree.objects.create(description=Data['title'])
+		bfs_queue = deque()
+		bfs_queue.append((Data, tree))
+		while len(bfs_queue) > 0:
+			node, parent = bfs_queue.popleft()
+			for it in node['content']:
+				if 'title' in it.keys():
+					bfs_queue.append((it, TaskTree.objects.create(description=it['title'], parent=parent)))
+				else:
+					TaskTree.objects.create(description=it['description'], task_id=it['task_id'], parent=parent)
+		tree = TaskTree.objects.all()
+		return render(request, 'taskgen/task_list.html', {'db_list': tree})
 
 def db_list(request):
 	db_list = TaskType.objects.all()
-	return render(request, 'taskgen/db_list.html', {'db_list': db_list})
+	return render(request, 'taskgen/task_list.html', {'db_list': db_list})
 
-def load_tasks(request):
+def statements(request):
 	tasks_id = list(request.POST.keys())[1:]
 	tasks = []
 	for it in tasks_id:
 		tasks.extend(map(lambda x: x.read_file(), Task.objects.filter(task_id__pk=it)))
-	output = []
-	for it in tasks:
-		i = 0
-		while i < len(it['text']['text1']):
-			if i % 2 != 0:
-				it["text"]["text1"][i] = str(it["inserts"][it["text"]["text1"][i]])
-			i += 1
-		output.append(it['text'])
-	print('output =', output)
-	return render(request, 'taskgen/load.html', {'tasks': output})
+	print('output =', tasks)
+	return render(request, 'taskgen/statements.html', {'tasks': tasks})
 
 def change_task(request):
 	return HttpResponse('TODO изменение задачи')
