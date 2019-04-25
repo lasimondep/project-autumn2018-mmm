@@ -2,104 +2,104 @@ import os
 from pathlib import Path
 import subprocess
 import json
+from collections import deque
 from common import AMQP_client
 
-gen_tree = gen_path = pr_set = {}
+def bfs(root):
+	timeouts = {}
+    d = deque()
+    d.append(root)
+    while d:
+    	node = d.popleft()
+    	if "task_id" in node.keys():
+    		timeouts.setdefault(node["task_id"], node["timeout"])
+    	else:
+    		for c in node["content"]:
+    			d.append(c)
+    return timeouts	
 
-with open("config.json") as json_file:
+
+with open("config.json", 'rb') as json_file:
 	lst = json.load(json_file)
-	gen_tree = lst[0]
+	gen_tree = {'title' : 'root', 'content' : lst[0]}
 	gen_path = lst[1]
 	pr_set = lst[2]
-
-		
-print(gen_path)
-def dfs(task_id, root, data):
-	if "title" in root:
-		for next_node in root["content"]:
-			res = dfs(task_id, next_node, data)
-			if res != None:
-				break
-		if res != None:
-			return {"title" : root["title"], "content" : res}
-		else:
-			return None
-	else:
-		if root["task_id"] == task_id:
-			root.setdefault("data_json", data)
-			return root;
-		else:
-			return None
-
+	timeouts = bfs(gen_tree)
 
 def get_CMD(task_id):
-	adr = gen_path[task_id]      #!!!!!!
-	print("adr =", adr)
+	adr = gen_path[task_id]     
 	ext = Path(adr).suffix
-	print("ext =", repr(ext))
-	print("pr_set =", repr(pr_set))
-	cmd = pr_set[ext]   #!!!!!!
-	print("cmd in get_CMD =", cmd)
+	cmd = pr_set[ext]   
 	cmd = cmd.replace("_FILE", adr)
 	return cmd
 
          
 
-def call_Generator(task_id, args):
-	cmd = gen_path[task_id] #!!!!!!!
+def call_Generator(task_id, args = None):
+	cmd = gen_path[task_id] 
 	if(Path(cmd).exists()):
+		cmd = get_CMD(task_id)
+		if args != None:
+			cmd = cmd + args
 		try:
-			cmd = get_CMD(task_id)
-			if args != "":
-				cmd = cmd + args
-			print("cmd =", cmd)
-			p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE)
-			p.wait()
+			p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+			p.wait(timeout = timeouts[task_id])
 			_data = p.stdout.read()
-			return _data
-		except:
-			return "error: can`t open generator " + task_id 
+			_err = p.stderr.read()
+			if _err == b'':
+				return _data
+			else:
+				return None
+		except TimeoutExpired:
+			p.kill()
+			return None
 	else:
-		return "error: wrong path to generator: " + cmd
+		return None
 	
-def get_args(a):
-	args = ""
-	for k in a:
-		args += " " + str(k) + "=\"" + str(a[k]) + "\""
-	return args
-				
+def get_arg(args, i):
+	if args != None:
+		arg = ""
+		a = args[i]
+		for k in a:
+			arg += " " + str(k) + "=\"" + str(a[k]) + "\""
+		return arg
+	else:
+		return None
+
+def process_one(Data)
+	arg = get_arg(Data["args"])
+	task_id  = Data["task_id"]
+	_data = call_Generator(task_id, arg)
+	return [{"task_id" : task_id, "json" : _data}]
+	
+def process_data(Data):
+	_data = []
+	for req in Data:
+		task_id = req["task_id"]
+		if task_id in gen_path.keys():
+			for i in range(req["count"]):
+				_from_gen = call_Generator(task_id)
+				if _from_gen != None:            #TODO: обработка ошибок???
+					_data.append({"task_id": task_id, "json" : _from_gen})	
+	return _data
+	
 		                                  
 """ MyClient """
 
 class MyClient(AMQP_client):
-	
-	def process_data(self, Id, _data, task_id):
-		if _data == 'error':
-				self.send('interface', Id, 'error_post_task', _data)
-		else:
-			to_base = dfs(task_id, gen_tree, _data)
-			print("to_base =", to_base)
-			self.send('database', Id, 'save_task', to_base);
-			print("_data =", repr(_data))
-			_tdata = json.dumps([json.loads(_data)])
-			print("_tdata =", repr(_tdata))
-			self.send('latex', Id, 'post_task', _tdata);
-	
+
 	def post_taskList(self, Id):
-		G = json.dumps(gen_tree)
-		self.send('interface', Id, 'post_taskList', G)
+		self.send('interface', Id, 'post_taskList', gen_tree)
 		   	
 	def post_task(self, Id, Type, Data):
+		_data = self.process_one(Data)
+		self.send('latex', Id, 'post_task', _data)
+					
+	
+	def get_task_text(self, Id, Type, Data):
 		task_id = Data["task_id"]
-		print("Data", Data)
-		print("task_id",task_id)
-		args = get_args(Data["args"])
-		if task_id in gen_path.keys():
-			_data = call_Generator(task_id, args)
-			self.process_data(Id, _data, task_id)
-		else:
-			self.send('interface', Id, 'error_post_task', 'Task is not in list')	
-				
+		_data = self.process_data(Data)
+        self.send('latex', Id, 'post_task_text', _data)	
 	
 	def parse(self, Id, Type, Data):
 		if Type == 'get_taskList':
@@ -108,7 +108,10 @@ class MyClient(AMQP_client):
 			if Type == 'get_task':
 				self.post_task(Id, Type, Data)
 			else:
-				self.send('interface', Id, 'error_post_task', 'Wrong request type')
+				if Type == 'get_task_text':
+					self.get_task_text(Id, Type, Data)
+				else:
+					self.send('interface', Id, 'error_post', 'Wrong request type')
 				
 
 if __name__ == '__main__':
