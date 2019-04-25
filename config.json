@@ -1,14 +1,15 @@
-[
+[[
 {
     "title": "ЕГЭ",
     "content" : [{
     				"title" : "Математика",
     				"content" :[{
     								"task_id" : "test", 
-    								"description" : "Тестовая задача"
+    								"description" : "Тестовая задача", 
+    								"timeout" : 1
     							}]
     			}]
-},
+}],
 {
 	"test" : "C:\\src\\spbu\\practice\\project\\git\\TestGen.py"
 },
