@@ -2,6 +2,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaulttags import register
 from django.shortcuts import render
 from collections import deque
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 import json
 import random
 
@@ -9,6 +11,34 @@ from .models import TaskTree, TaskType, Task
 import taskgen.communications as comm
 
 # Create your views here.
+
+def my_view(request):
+	if request.method == 'POST' and "choizy" in request.POST:
+		username = request.POST['username']
+		password = request.POST['password']
+		print(password, username)
+		user = authenticate(request, username=username, password=password)
+		print(user)
+		if user is not None:
+			login(request, user)
+			return render(request,"taskgen/index.html")
+		else:
+			x = 'wrong data'
+			return render(request, 'taskgen/login.html', {"x": x})
+	else:
+		return render(request, 'taskgen/login.html')
+
+def my_view_reg(request):
+	if request.method == 'POST' and "choizy" in request.POST:
+		username = request.POST['username']
+		password = request.POST['password']
+		print(password, username)
+		user = User.objects.create_user(username, None, password)
+		user.save()
+		print(user)
+		return render(request, "taskgen/index.html")
+	else:
+		return render(request, 'taskgen/register.html')
 
 @register.filter
 def get_item(dictionary, key):

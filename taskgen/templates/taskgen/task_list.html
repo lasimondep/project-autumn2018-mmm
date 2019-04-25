@@ -1,3 +1,7 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'taskgen/style.css' %}">
+
 <head>
 	<style>
 		.hide {display: none}
@@ -11,7 +15,8 @@
 	  	}
 	</style>
 </head>
-
+<body>
+<h1>Выберите задачу</h1>
 {% load mptt_tags %}
 <form action="{% url 'taskgen:statements' %}", method='post'>
 {% csrf_token %}
@@ -22,7 +27,7 @@
 			{% if not node.is_leaf_node %}
 				<label for="hide{{ node.pk }}" class="lhide">{{ node.description }}</label>
 				{% if node.task_id %}
-					<input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0">
+					<input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0" class="form2">
 				{% endif %}
 				<input type="checkbox" id="hide{{ node.pk }}" class="hide">
 				<ul class="children">
@@ -37,5 +42,7 @@
 		</li>
 	{% endrecursetree %}
 </ul>
-<input type="submit" value="Загрузить выбранные">
+<input type="submit" value="Загрузить выбранные" class="button">
 </form>
+<div class = "home"><a href="/">На главную</a></div>
+</body>

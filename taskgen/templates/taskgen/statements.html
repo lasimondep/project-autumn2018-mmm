@@ -1,4 +1,7 @@
 {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'taskgen/style.css' %}">
+
+
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
@@ -15,6 +18,7 @@
 	</script>
 </head>
 <body>
+<h1>Задачи для решения</h1>
 
 {% if types %}
 <form action="{% url 'taskgen:statements' %}", method='post'>
@@ -22,8 +26,11 @@
 <input type='hidden' name='get_from' value='{{ get_from }}'>
 <input type='hidden' name='statements_id', value='{{ statements_id }}'>
 {% for type in types %}
-	{{ type|get_item:"description" }}<br>
+    <div class = "col3">
+	<input type='hidden' name='savedata' value='{{ type }}'>
+        <div class = "task_name">	{{ type|get_item:"description" }}</div>
 	{% for tasks in type|get_item:"tasks" %}
+        <div class = "col4">
 		{% for word in tasks %}
 			{% if forloop.counter|divisibleby:"2" %}
 				<input type='checkbox' name='checkbox{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}' value='{{ forloop.counter }}'>
@@ -32,10 +39,13 @@
 				{{ word|safe }}
 			{% endif %}
 		{% endfor %}
-		<input type='submit' name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>
+        </div>
+		<input type='submit' class="button" name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>
 		<br>
 	{% endfor %}
+       </div>
 {% endfor %}
 </form>
 {% endif %}
+<div class = "home"><a href="/">На главную</a></div>
 </body>

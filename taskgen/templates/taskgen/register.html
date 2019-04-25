@@ -1,0 +1,22 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'taskgen/style.css' %}">
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Вход</title>
+      <h1>Регистрация</h1>
+  </head>
+  <body>
+    <form method="post">
+      {% csrf_token %}
+      <!-- as_p для того, чтобы каждый элемент формы был с новой строки -->
+      <input type="text" class="form1" name="username">
+        <input type="text" class="form1" name="password" >
+      <button type="submit" name="choizy" class="button">Зарегистрироваться</button>
+    </form>
+  <a href="{% url 'taskgen:my_view' %}">Уже есть профиль?</a>
+  <div class = "home"><a href="/">На главную</a></div>
+  </body>
+</html>
