@@ -70,7 +70,7 @@ def process_one(Data)
 	arg = get_arg(Data["args"])
 	task_id  = Data["task_id"]
 	_data = call_Generator(task_id, arg)
-	return {"task_id" : task_id, "json" : _data}
+	return [{"task_id" : task_id, "json" : _data}]
 	
 def process_data(Data):
 	_data = []
