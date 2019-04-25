@@ -1,34 +1,40 @@
 {% load static %}
-
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  tex2jax: {
-    inlineMath: [['$','$'], ['\\(','\\)']],
-    processEscapes: true
-  }
-});
-</script>
-
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
 	<script type="text/javascript" async
-	  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
+		src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
+	</script>
+	<script type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+			tex2jax: {
+				inlineMath: [['$','$'], ['\\(','\\)']],
+				processEscapes: true
+			}
+		});
 	</script>
 </head>
 <body>
 
-{% if tasks %}
-<form action="{% url 'taskgen:change_task' %}", method="post">
-{% for task in tasks %}
-	{%	for word in task %}
-		{% if forloop.counter|divisibleby:"2" %}
-			<input type="text" value="{{ word }}">
-		{% else %}
-			{{ word }}
-		{% endif %}
+{% if types %}
+<form action="{% url 'taskgen:statements' %}", method='post'>
+{% csrf_token %}
+<input type='hidden' name='get_from' value='{{ get_from }}'>
+{% for type in types %}
+	<input type='hidden' name='savedata' value='{{ type }}'>
+	{{ type|get_item:"description" }}<br>
+	{% for tasks in type|get_item:"tasks" %}
+		{% for word in tasks %}
+			{% if forloop.counter|divisibleby:"2" %}
+				<input type='checkbox' name='checkbox{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}' value='{{ forloop.counter }}'>
+				<input type='text' name='insert{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}' value='{{ word }}'>
+			{% else %}
+				{{ word }}
+			{% endif %}
+		{% endfor %}
+		<input type='submit' name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>
+		<br>
 	{% endfor %}
-	<br>
 {% endfor %}
 </form>
 {% endif %}

@@ -1,17 +1,38 @@
+<head>
+	<style>
+		.hide {display: none}
+		.hide:not(:checked) + * { display: none; }
+		.lhide { display: inline-block;
+			padding: 1px 10px;
+			border-radius: 2px;
+			color: #fff;
+			background: #4e6473;
+			cursor: pointer;
+	  	}
+	</style>
+</head>
+
 {% load mptt_tags %}
-<form action="{% url 'taskgen:statements' %}", method="post">
+<form action="{% url 'taskgen:statements' %}", method='post'>
 {% csrf_token %}
+<input type='hidden' name='get_from' value='{{ get_from }}'>
 <ul>
-	{% recursetree db_list %}
+	{% recursetree task_list %}
 		<li>
 			{% if not node.is_leaf_node %}
-				{{ node.description }}
+				<label for="hide{{ node.pk }}" class="lhide">{{ node.description }}</label>
+				{% if node.task_id %}
+					<input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0">
+				{% endif %}
+				<input type="checkbox" id="hide{{ node.pk }}" class="hide">
 				<ul class="children">
 					{{ children }}
 				</ul>
 			{% else %}
-				<input type="checkbox" name="{{ node.pk }}" id="cb{{ node.pk }}">
-				<label for="cb{{ node.pk }}">{{ node.description }}</label>
+				{{ node.description }}
+				{% if node.task_id %}
+					<input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0">
+				{% endif %}
 			{% endif %}
 		</li>
 	{% endrecursetree %}

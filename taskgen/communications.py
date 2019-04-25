@@ -21,10 +21,10 @@ class InterfaceClient(AMQP_client):
 		super(InterfaceClient, self).__init__(Host, e_name, e_type)
 		self.ans_queue = list()
 
-	def send_request(self, to_name, Type, Data=None, to_type='fanout'):
+	def send_request(self, to_name, Type, Data=None, to_type='fanout', timeout=_REQUEST_TIMEOUT):
 		Id = next(InterfaceClient.request_id)
 		self.send(to_name, Id, Type, Data, to_type)
-		time.sleep(_REQUEST_TIMEOUT)
+		time.sleep(_REQUEST_TIMEOUT + timeout)
 		if Id not in map(lambda x: x['Id'], self.ans_queue):
 			raise InterfaceClient.TimeOutExcept()
 		else:
