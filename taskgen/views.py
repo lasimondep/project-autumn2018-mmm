@@ -33,7 +33,7 @@ def generate_list(request):
 				if 'title' in it.keys():
 					bfs_queue.append((it, TaskTree.objects.create(description=it['title'], parent=parent)))
 				else:
-					TaskTree.objects.create(description=it['description'], task_id=it['task_id'], parent=parent)
+					TaskTree.objects.create(description=it['description'], task_id=it['task_id'], parent=parent, task_timeout=it['timeout'])
 	tree = TaskTree.objects.all()
 	return render(request, 'taskgen/task_list.html', {'task_list': tree, 'get_from': 'facade'})
 
@@ -66,7 +66,7 @@ def statements(request):
 				gen_request.append({'task_id': res.task_id, 'count': it[1]})
 			print('\ngen_request =', gen_request, '\n')
 			try:
-				Type, Data = comm.interface_client.send_request('facade', 'get_task', Data=gen_request, timeout=timeout)
+				Type, Data = comm.interface_client.send_request('facade', 'get_task_text', Data=gen_request, timeout=timeout)
 			except comm.InterfaceClient.TimeOutExcept:
 				return HttpResponse('Фасад временно недоступен')				
 #			Data = [{'task_id': 'm2', 'tex': ['Calculate ', '15', ' with ', '24']},
@@ -75,9 +75,9 @@ def statements(request):
 			group_tasks = {}
 			for it in Data:
 				if it['task_id'] in group_tasks.keys():
-					group_tasks[it['task_id']].append(it['tex'])
+					group_tasks[it['task_id']].append(json.loads(it['json']))
 				else:
-					group_tasks[it['task_id']] = [it['tex']]
+					group_tasks[it['task_id']] = [json.loads(it['json'])]
 			for it in group_tasks.keys():
 				task_type = TaskTree.objects.get(task_id=it)
 				statements_output.append({'task_id': task_type.task_id, 'description': task_type.description, 'tasks': group_tasks[it]})

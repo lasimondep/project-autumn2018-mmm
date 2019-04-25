@@ -1,17 +1,18 @@
-[[
+[[{"title": "ЕГЭ", "content" : [
+	{"title": "Информатика", "content": [
+		{"task_id": "i6", "description": "Задача №6", "timeout": 1},
+		{"title": "Задача №11", "content": [
+			{"task_id": "i11_1", "description": "Тип №1", "timeout": 1},
+			{"task_id": "i11_2", "description": "Тип №2", "timeout": 1}
+		]},
+		{"task_id": "i25_1", "description": "Задача №25", "timeout": 1}
+	]}
+]}],
 {
-    "title": "ЕГЭ",
-    "content" : [{
-    				"title" : "Математика",
-    				"content" :[{
-    								"task_id" : "test", 
-    								"description" : "Тестовая задача", 
-    								"timeout" : 1
-    							}]
-    			}]
-}],
-{
-	"test" : "C:\\src\\spbu\\practice\\project\\git\\TestGen.py"
+	"i6": "C:\\src\\spbu\\practice\\project\\git\\generators\\6.py",
+	"i11_1": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_11_1.py",
+	"i11_2": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_11_2.py",
+	"i25_1": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_25_1.py"
 },
 {
 	".py" : "python _FILE", ".exe" : "_FILE"

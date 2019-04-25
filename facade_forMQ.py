@@ -7,16 +7,16 @@ from common import AMQP_client
 
 def bfs(root):
 	timeouts = {}
-    d = deque()
-    d.append(root)
-    while d:
-    	node = d.popleft()
-    	if "task_id" in node.keys():
-    		timeouts.setdefault(node["task_id"], node["timeout"])
-    	else:
-    		for c in node["content"]:
-    			d.append(c)
-    return timeouts	
+	d = deque()
+	d.append(root)
+	while d:
+		node = d.popleft()
+		if "task_id" in node.keys():
+			timeouts.setdefault(node["task_id"], node["timeout"])
+		else:
+			for c in node["content"]:
+				d.append(c)
+	return timeouts	
 
 
 with open("config.json", 'rb') as json_file:
@@ -27,13 +27,13 @@ with open("config.json", 'rb') as json_file:
 	timeouts = bfs(gen_tree)
 
 def get_CMD(task_id):
-	adr = gen_path[task_id]     
+	adr = gen_path[task_id]	 
 	ext = Path(adr).suffix
 	cmd = pr_set[ext]   
 	cmd = cmd.replace("_FILE", adr)
 	return cmd
 
-         
+		 
 
 def call_Generator(task_id, args = None):
 	cmd = gen_path[task_id] 
@@ -66,9 +66,9 @@ def get_arg(args, i):
 	else:
 		return None
 
-def process_one(Data)
-	arg = get_arg(Data["args"])
-	task_id  = Data["task_id"]
+def process_one(Data):
+	arg = get_arg(Data.get("args"))
+	task_id = Data["task_id"]
 	_data = call_Generator(task_id, arg)
 	return [{"task_id" : task_id, "json" : _data}]
 	
@@ -79,11 +79,11 @@ def process_data(Data):
 		if task_id in gen_path.keys():
 			for i in range(req["count"]):
 				_from_gen = call_Generator(task_id)
-				if _from_gen != None:            #TODO: обработка ошибок???
+				if _from_gen != None:			#TODO: обработка ошибок???
 					_data.append({"task_id": task_id, "json" : _from_gen})	
 	return _data
 	
-		                                  
+										  
 """ MyClient """
 
 class MyClient(AMQP_client):
@@ -92,14 +92,13 @@ class MyClient(AMQP_client):
 		self.send('interface', Id, 'post_taskList', gen_tree)
 		   	
 	def post_task(self, Id, Type, Data):
-		_data = self.process_one(Data)
+		_data = process_one(Data)
 		self.send('latex', Id, 'post_task', _data)
 					
 	
 	def get_task_text(self, Id, Type, Data):
-		task_id = Data["task_id"]
-		_data = self.process_data(Data)
-        self.send('latex', Id, 'post_task_text', _data)	
+		_data = process_data(Data)
+		self.send('latex', Id, 'get_task_text', _data)	
 	
 	def parse(self, Id, Type, Data):
 		if Type == 'get_taskList':
@@ -110,8 +109,6 @@ class MyClient(AMQP_client):
 			else:
 				if Type == 'get_task_text':
 					self.get_task_text(Id, Type, Data)
-				else:
-					self.send('interface', Id, 'error_post', 'Wrong request type')
 				
 
 if __name__ == '__main__':

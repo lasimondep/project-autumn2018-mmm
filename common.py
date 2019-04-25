@@ -32,6 +32,7 @@ class AMQP_client:
 	def callback(self, ch, method, properties, body):
 		"""Обработчик сообщений от RabbitMQ"""
 		received = pickle.loads(body)
+		print('\nReceived: Id =', received.Id, 'Type =', received.Type, 'Data =', received.Data, '\n')
 		self.parse(received.Id, received.Type, received.Data)
 
 	def send(self, to_name, Id, Type, Data=None, to_type="fanout"):
@@ -41,6 +42,7 @@ class AMQP_client:
 		channel.exchange_declare(exchange = to_name, exchange_type = to_type)
 		channel.basic_publish(exchange = to_name, routing_key = '', body = pickle.dumps(self.Message(Id, Type, Data)))
 		connection.close()
+		print('\nSent: Id =', Id, 'Type =', Type, 'Data =', Data, '\n')
 
 	class ThreadAMQP(threading.Thread):
 		"""Запуск прослушки сообщений из RabbitMQ в отдельном потоке"""

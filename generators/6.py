@@ -58,7 +58,6 @@ json_dict['text'].update({"text1":text1})
 json_dict['answers'].update({"text1":["Ответ","insert2"]})
 json_dict['inserts'].update({"insert1":str(R1)})
 json_dict['inserts'].update({"insert2":str(answer)})
-print(json_dict['inserts'])
 
 f2=json.dumps(json_dict)
 print(f2)
