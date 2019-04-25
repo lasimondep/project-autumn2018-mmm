@@ -8,15 +8,15 @@ def modify_str(str1, Type):
     pattern1 = r'insert\d{,100}'
     str1 = str1.replace('\{\{', '{')
     str1 = str1.replace('\}\}', '}')
-    str1 = str1.replace('<', '{<}')
+    str1 = str1.replace('{-}', '-')
     str1 = str1.replace('\&\&\&', '&')
     str1 = str1.replace(r'\textbackslash{}', '\\')
     interface_str = ''
     flag = False
+    flag1 = False
 
-    if Type == "get_task_text":
+    if Type == "get_task_text" or Type == "get_task":
         str1 = str1.replace('%', '')
-        str1 = str1.replace(r'\newline', r'\\')
         str1 = str1.replace(r'\normalsize', '')
         str1_list = str1.splitlines()
         temp_str = ''
@@ -27,6 +27,15 @@ def modify_str(str1, Type):
                 flag = True
                 continue
             if flag:
+                if i == r'\begin{array}{|l|l|l|}':
+                    flag1 = True
+                if i ==r'\end{array}':
+                    flag1 = False
+                if flag1:
+                    i = i.replace(r'\newline', r'\\')
+                    i = i.replace('<', '{<}')
+                else:
+                    i = i.replace(r'\newline', r'<br>')
                 match1 = re.findall(pattern1, i)
                 if match1:
                     str1 = re.findall(pattern1, i)[0]
@@ -93,7 +102,7 @@ def func(data, Type):
         tex = doc.dumps()
         tex = modify_str(tex, Type)
 
-    elif Type == 'get_task_text':
+    elif Type == 'get_task_text' or Type == "get_task":
         doc = []
         tex = []
         for i in range(len(json_in)):
@@ -253,7 +262,7 @@ class TexClient(AMQP_client):
             json_tex = json.dumps(json_tex)
             self.send('interface', Id, 'get_pdf', json_tex)
 
-        if Type == "get_task_text":
+        if Type == "get_task_text" or Type == "get_task":
             json_text = []
             for index in range(len(Data)):
                 json_text.append(json.loads(Data[index]['json']))
@@ -307,7 +316,17 @@ except KeyboardInterrupt:
 #         json_text.append(json_in[i]['json'])
 #     print(json_text)
 #
+#
+#
 #     Type = "get_task_text"
+#
+#     for index in range(len(json_in)):
+#         json_text.append(json_in[index]['json'])
+#     tex_lst = func(json_text, Type)
+#     for i in range(len(json_in)):
+#         json_in[i].update({'json': json.dumps(tex_lst[i])})
+#     print(json_in)
+#
 #     tex_lst = func(json_text, Type)
 #     json_out = json.dumps(tex_lst)
 #     print(tex_lst)
