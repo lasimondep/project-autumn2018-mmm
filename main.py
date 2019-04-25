@@ -39,7 +39,7 @@ def modify_str(str1, Type):
                 match1 = re.findall(pattern1, i)
                 if match1:
                     str1 = re.findall(pattern1, i)[0]
-                    interface_str += [temp_str] + [i.replace(str1, '') + ' ']
+                    interface_str += [temp_str] + [i.replace(str1, '')]
                     temp_str = ''
                 elif i == '\\end{document}':
                     interface_str += [temp_str]

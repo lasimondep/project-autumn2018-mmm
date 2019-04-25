@@ -1,7 +1,6 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'taskgen/style.css' %}">
 
-
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
@@ -19,7 +18,6 @@
 </head>
 <body>
 <h1>Задачи для решения</h1>
-
 {% if types %}
 <form action="{% url 'taskgen:statements' %}", method='post'>
 {% csrf_token %}
@@ -43,9 +41,11 @@
 		<input type='submit' class="button" name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>
 		<br>
 	{% endfor %}
-       </div>
+	</div>
 {% endfor %}
 </form>
 {% endif %}
-<div class = "home"><a href="/">На главную</a></div>
+<div class = "home">
+	<a href="/">На главную</a>
+</div>
 </body>

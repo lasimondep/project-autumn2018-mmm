@@ -1,18 +1,18 @@
-[[{"title": "EGI", "content" : [
-	{"title": "Info", "content": [
-		{"task_id": "i6", "description": "task №6", "timeout": 1},
-		{"title": "task №11", "content": [
-			{"task_id": "i11_1", "description": "type №1", "timeout": 1},
-			{"task_id": "i11_2", "description": "type №2", "timeout": 1}
+[{"title": "ЕГЭ", "content" : [
+	{"title": "Информатика", "content": [
+		{"task_id": "i6", "description": "Задача №6", "timeout": 1},
+		{"title": "Задача №11", "content": [
+			{"task_id": "i11_1", "description": "Задача №11, подтип 1", "timeout": 1},
+			{"task_id": "i11_2", "description": "Задача №11 подтип 2", "timeout": 1}
 		]},
-		{"task_id": "i25_1", "description": "type №25", "timeout": 1}
+		{"task_id": "i25_1", "description": "Задача № 25", "timeout": 1}
 	]}
-]}],
+]},
 {
-	"i6": "C:\\Users\\Sentinel\\Desktop\\project-autumn2018-mmm-new_web_server\\generators\\6.py",
+	"i6": "C:\\src\\spbu\\practice\\project\\git\\generators\\6.py",
 	"i11_1": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_11_1.py",
 	"i11_2": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_11_2.py",
-	"i25_1": "C:\\Users\\Sentinel\\Desktop\\project-autumn2018-mmm-new_web_server\\generators\\i_25_1.py"
+	"i25_1": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_25_1.py"
 },
 {
 	".py" : "python _FILE", ".exe" : "_FILE"

@@ -16,7 +16,13 @@
 	</style>
 </head>
 <body>
-<h1>Выберите задачу</h1>
+<h1>Доступные задачи</h1>
+Выберите категорию и впишите требуемое количество задач для
+{% if get_from == "facade" %}
+	генерации.
+{% else %}
+	загрузки из базы данных.
+{% endif %}
 {% load mptt_tags %}
 <form action="{% url 'taskgen:statements' %}", method='post'>
 {% csrf_token %}

@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaulttags import register
 from django.shortcuts import render
+from django.urls import reverse
 from collections import deque
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -74,6 +75,8 @@ def db_list(request):
 statements_list = [] # Костыль
 
 def statements(request):
+	if request.method != 'POST':
+		return HttpResponseRedirect(reverse('taskgen:index'))
 	get_from = request.POST['get_from']
 	global statements_list
 	if get_from == 'facade' or get_from == 'db':

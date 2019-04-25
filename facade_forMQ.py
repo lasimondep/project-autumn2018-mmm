@@ -21,7 +21,8 @@ def bfs(root):
 
 with open("config.json", 'rb') as json_file:
 	lst = json.load(json_file)
-	gen_tree = {'title' : 'root', 'content' : lst[0]}
+#	gen_tree = {'title' : 'root', 'content' : lst[0]}
+	gen_tree = lst[0]
 	gen_path = lst[1]
 	pr_set = lst[2]
 	timeouts = bfs(gen_tree)

@@ -115,15 +115,17 @@ h1  {
 .col3{
     position: relative;
     padding: 10px;
-    width: auto;
+    width: 75%;
     height: auto;
     margin-top: 34px;
+    margin-left: auto;
+    margin-right: auto;
     border: dotted 3px #4b302c;
     background-color: #fab238;
 }
 .col2{
     padding: 10px;
-    positon: relative;
+    position: relative;
     border: dotted 3px #4dfa26;
     margin-top: 10px;
     margin-left: 530px;
