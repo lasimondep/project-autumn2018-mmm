@@ -20,6 +20,7 @@
 <form action="{% url 'taskgen:statements' %}", method='post'>
 {% csrf_token %}
 <input type='hidden' name='get_from' value='{{ get_from }}'>
+<input type='hidden' name='statements_id', value='{{ statements_id }}'>
 {% for type in types %}
 	{{ type|get_item:"description" }}<br>
 	{% for tasks in type|get_item:"tasks" %}

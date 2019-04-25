@@ -56,20 +56,24 @@ def call_Generator(task_id, args = None):
 	else:
 		return None
 	
-def get_arg(args, i):
+def get_arg(args):
 	if args != None:
 		arg = ""
-		a = args[i]
+		a = args
+		i = 1
 		for k in a:
-			arg += " " + str(k) + "=\"" + str(a[k]) + "\""
+			if k != None:
+				arg += " " + str(i) + "=\"" + str(k) + "\""
 		return arg
 	else:
 		return None
 
 def process_one(Data):
 	arg = get_arg(Data.get("args"))
-	task_id = Data["task_id"]
+	task_id  = Data["task_id"]
 	_data = call_Generator(task_id, arg)
+	if _data == None:
+		return []
 	return [{"task_id" : task_id, "json" : _data}]
 	
 def process_data(Data):
@@ -84,7 +88,7 @@ def process_data(Data):
 	return _data
 	
 										  
-""" MyClient """
+""" MyClient """																		 
 
 class MyClient(AMQP_client):
 
@@ -93,12 +97,14 @@ class MyClient(AMQP_client):
 		   	
 	def post_task(self, Id, Type, Data):
 		_data = process_one(Data)
-		self.send('latex', Id, 'post_task', _data)
+		if _data != []:
+			self.send('latex', Id, 'get_task', _data)
 					
 	
 	def get_task_text(self, Id, Type, Data):
 		_data = process_data(Data)
-		self.send('latex', Id, 'get_task_text', _data)	
+		if _data != []:
+			self.send('latex', Id, 'get_task_text', _data)	
 	
 	def parse(self, Id, Type, Data):
 		if Type == 'get_taskList':
