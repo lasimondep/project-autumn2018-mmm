@@ -21,7 +21,6 @@
 {% csrf_token %}
 <input type='hidden' name='get_from' value='{{ get_from }}'>
 {% for type in types %}
-	<input type='hidden' name='savedata' value='{{ type }}'>
 	{{ type|get_item:"description" }}<br>
 	{% for tasks in type|get_item:"tasks" %}
 		{% for word in tasks %}
@@ -29,7 +28,7 @@
 				<input type='checkbox' name='checkbox{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}' value='{{ forloop.counter }}'>
 				<input type='text' name='insert{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}' value='{{ word }}'>
 			{% else %}
-				{{ word }}
+				{{ word|safe }}
 			{% endif %}
 		{% endfor %}
 		<input type='submit' name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>

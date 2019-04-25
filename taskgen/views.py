@@ -108,6 +108,3 @@ def statements(request):
 		return render(request, 'taskgen/statements.html', {'types': statements_output, 'get_from': 'change'})
 	if get_from == 'change':
 		return render(request, 'taskgen/statements.html', {'types': statements_output, 'get_from': 'change'})
-
-#def change_task(request):
-#	return render(request, 'taskgen/debug.html', {'debug': str(type(request.POST['savedata']))})
