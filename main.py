@@ -99,8 +99,9 @@ def func(data, Type):
         doc = Document(geometry_options=geometry_options)
         doc.preamble.append(Command('usepackage[english, russian]', 'babel'))
         pdf_generate(doc, json_in, flag)
-        tex = doc.dumps()
-        tex = modify_str(tex, Type)
+        tex = doc
+        # tex = modify_str(tex, Type)
+        # tex = doc.dumps()
 
     elif Type == 'get_task_text' or Type == "get_task":
         doc = []
@@ -180,18 +181,25 @@ def pdf_generate(doc, json_in, flag):
                     for col in json_in[i]['text'][key][row]:
                         cols.append(json_in[i]['text'][key][row][col][0])
                     rows.append(cols)
-                for j in range(3):
-                    rows[1][j] = rows[1][j].replace(' ', '\;')
-                # print(rows)
-                doc.append('\n\n')
-                doc.append(Command('begin{array}', '|l|l|l|'))
-                doc.append(Command('hline'))
-                doc.append(r'Паскаль &&& Python &&& C++ \\')
-                doc.append(Command('hline'))
-                doc.append('{{' + rows[1][0] + '}}' + ' &&& ' + '{{' + rows[1][1] + '}}' + ' &&& ' + '{{' + rows[1][
-                    2] + r'}} \\')
-                doc.append(Command('hline'))
-                doc.append(Command('end', 'array'))
+                doc.append(Command('begin{enumerate}'))
+                for i in range(len(rows[0])):
+                    doc.append(Command('item'))
+                    doc.append(rows[0][i])
+                    doc.append(Command('newline'))
+                    doc.append(rows[1][i])
+                doc.append(Command('end', 'enumerate'))
+                # for j in range(3):
+                #     rows[1][j] = rows[1][j].replace(' ', '\;')
+                # # print(rows)
+                # doc.append('\n\n')
+                # doc.append(Command('begin{array}', '|l|l|l|'))
+                # doc.append(Command('hline'))
+                # doc.append(r'Паскаль &&& Python &&& C++ \\')
+                # doc.append(Command('hline'))
+                # doc.append('{{' + rows[1][0] + '}}' + ' &&& ' + '{{' + rows[1][1] + '}}' + ' &&& ' + '{{' + rows[1][
+                #     2] + r'}} \\')
+                # doc.append(Command('hline'))
+                # doc.append(Command('end', 'array'))
 
         if flag:
             for text in json_in[i]['answers']:
@@ -258,8 +266,10 @@ class TexClient(AMQP_client):
             self.send('interface', Id, 'post_tex', json_out)
 
         if Type == "get_pdf":
-            json_tex = func(Data, Type)
-            json_tex = json.dumps(json_tex)
+            tex_in = []
+            for i in range(len(Data)):
+                tex_in.append(json.loads(Data[i]))
+            json_tex = func(tex_in, Type)
             self.send('interface', Id, 'get_pdf', json_tex)
 
         if Type == "get_task_text" or Type == "get_task":
@@ -269,7 +279,9 @@ class TexClient(AMQP_client):
             tex_lst = func(json_text, Type)
             for i in range(len(Data)):
                 Data[i].update({'json': json.dumps(tex_lst[i])})
+                Data[i].update({'raw': json.dumps(json_text[i])})
             self.send('interface', Id, 'tex_task_text', Data)
+
 
 
 client = TexClient('localhost', 'latex')
@@ -307,7 +319,7 @@ except KeyboardInterrupt:
 #                              }
 #                     }
 #     }}]
-#     print(json_in)
+#     # print(json_in)
 #     tex = []
 #     tex_out = ''
 #     flag = True
@@ -318,38 +330,34 @@ except KeyboardInterrupt:
 #
 #
 #
-#     Type = "get_task_text"
+#     # Type = "get_task_text"
+#     #
+#     # for index in range(len(json_in)):
+#     #     json_text.append(json_in[index]['json'])
+#     # tex_lst = func(json_text, Type)
+#     # for i in range(len(json_in)):
+#     #     json_in[i].update({'json': json.dumps(tex_lst[i])})
+#     # print(json_in)
+#     #
+#     # tex_lst = func(json_text, Type)
+#     # json_out = json.dumps(tex_lst)
+#     # print(tex_lst)
+#     #
+#     # with open('output.tex', 'w') as tex_out:
+#     #     for i in tex_lst:
+#     #         for line in i:
+#     #             tex_out.write(line)
+#     #             tex_out.write('\n')
 #
-#     for index in range(len(json_in)):
-#         json_text.append(json_in[index]['json'])
-#     tex_lst = func(json_text, Type)
-#     for i in range(len(json_in)):
-#         json_in[i].update({'json': json.dumps(tex_lst[i])})
-#     print(json_in)
-#
-#     tex_lst = func(json_text, Type)
-#     json_out = json.dumps(tex_lst)
-#     print(tex_lst)
-#
-#     with open('output.tex', 'w') as tex_out:
-#         for i in tex_lst:
-#             for line in i:
-#                 tex_out.write(line)
-#                 tex_out.write('\n')
-#
-#     # Type = "get_pdf"
-#     # tex_out = func(json_text, Type)
+#     Type = "get_pdf"
+#     tex_out = func(json_text, Type)
 #     # json_out = json.dumps(tex_out)
-#     # print(tex_out)
-#     #
-#     # for i in tex_out:
-#     #     for line in i:
-#     #         print(line, end='')
-#     #
-#     # with open('output.tex', 'w') as tout:
-#     #     for i in tex_out:
-#     #         tout.write(i)
-
-
-
-
+#     print(tex_out)
+#
+#     for i in tex_out:
+#         for line in i:
+#             print(line, end='')
+#
+#     with open('output.tex', 'w') as tout:
+#         for i in tex_out:
+#             tout.write(i)
