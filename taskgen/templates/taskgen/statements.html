@@ -45,6 +45,11 @@
 {% endfor %}
 </form>
 {% endif %}
+<form action="{% url 'taskgen:download' %}", method='post'>
+{% csrf_token %}
+<input type='hidden' name='statements_id', value='{{ statements_id }}'>
+<input type="submit" class="button" name="down_button" value="загрузить">
+</form>
 <div class = "home">
 	<a href="/">На главную</a>
 </div>

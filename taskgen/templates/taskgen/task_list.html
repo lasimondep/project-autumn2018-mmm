@@ -26,6 +26,10 @@
 {% load mptt_tags %}
 <form action="{% url 'taskgen:statements' %}", method='post'>
 {% csrf_token %}
+<h5>
+Убирать просмотренные задачи?
+<input type="checkbox" name="checkbox" class="form1">
+</h5>
 <input type='hidden' name='get_from' value='{{ get_from }}'>
 <ul>
 	{% recursetree task_list %}

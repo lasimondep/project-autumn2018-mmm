@@ -9,6 +9,6 @@ urlpatterns = [
 	path('list/db/', views.db_list, name='db_list'),
 	path('login/', views.my_view, name='my_view'),
 	path('register/', views.my_view_reg, name='my_view_reg'),
-	path('statements/', views.statements, name='statements')
-#	path('statements/', views.statements, name='statements')
+	path('statements/', views.statements, name='statements'),
+	path('statements/download', views.download, name='download')
 ]

@@ -13,11 +13,13 @@
 {% csrf_token %}
 	<!-- as_p для того, чтобы каждый элемент формы был с новой строки -->
 	<input type="text" class="form1" name="username">
-	<input type="text" class="form1" name="password">
+	<input type="password" class="form1" name="password">
 	<button type="submit" name="choizy" class="button">Войти</button>
 </form>
 {{ x }}
 <div class = "home">
+    <a href="{% static 'taskgen/photo5386366040247740930.jpg' %}" download>click here</a>
+
 	<a href="/">На главную</a>
 </div>
 </body>
