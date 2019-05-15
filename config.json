@@ -9,10 +9,10 @@
 	]}
 ]},
 {
-	"i6": "C:\\src\\spbu\\practice\\project\\git\\generators\\6.py",
-	"i11_1": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_11_1.py",
-	"i11_2": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_11_2.py",
-	"i25_1": "C:\\src\\spbu\\practice\\project\\git\\generators\\i_25_1.py"
+	"i6": "./generators/6.py",
+	"i11_1": "./generators/i_11_1.py",
+	"i11_2": "./generators/i_11_2.py",
+	"i25_1": "./generators/i_25_1.py"
 },
 {
 	".py" : "python _FILE", ".exe" : "_FILE"

@@ -156,7 +156,7 @@ def statements(request):
 						task_new = Task.objects.create(parent=task_type)
 						if request.user.is_authenticated:
 							currentuser = User.objects.get(username=request.user)
-							task_new.user = currentuser
+							task_new.user.add(currentuser)
 							task_new.save()
 						task_new.save_file(json.dumps(one_task['text']))
 						task_new.save_raw(json.dumps(one_task['raw']))
@@ -219,20 +219,25 @@ def download(request):
 	if request.user.is_authenticated:
 		currentuser = User.objects.get(username=request.user)
 	else:
-		return HttpResponseRedirect(reverse('taskgen:login'))
+		return HttpResponseRedirect(reverse('taskgen:my_view'))
 	statements_id = int(request.POST['statements_id'][0])
 	statements_input = statements_raw[statements_id]
 	doc_request = []
 	for it in statements_input:
-		doc_request.extend(it)
+		doc_request.extend(list(map(lambda x: json.dumps(x), it)))
 
 	try:
 		Type, Data = comm.interface_client.send_request('latex', 'get_pdf', Data=doc_request, timeout=3)
 	except comm.InterfaceClient.TimeOutExcept:
 		return HttpResponse('Tex модуль временно недоступен')
 
-	filename = 'td' + str(random.randint(10000, 99999)) + '.pdf'
-	Data.generate_pdf(filepath='./temp/', filename=filename)
+	filename = 'td' + str(random.randint(10000, 99999))
+	try:
+		os.mkdir('temp', mode=0o777, dir_fd=None)
+	except FileExistsError:
+		pass
+	Data.generate_pdf(filepath='temp/' + filename)
+	filename = filename + '.pdf'
 	with open('./temp/' + filename, 'rb') as fin:
 		Data = fin.read()
 	response = HttpResponse(Data, content_type='text/plain')
