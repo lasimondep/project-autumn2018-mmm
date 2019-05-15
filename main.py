@@ -266,9 +266,11 @@ class TexClient(AMQP_client):
             self.send('interface', Id, 'post_tex', json_out)
 
         if Type == "get_pdf":
-            tex_output = func(Data, Type)
-            # json_tex = json.dumps(json_tex)
-            self.send('interface', Id, 'get_pdf', tex_output)
+            tex_in = []
+            for i in range(len(Data)):
+                tex_in.append(json.loads(Data[i]))
+            json_tex = func(tex_in, Type)
+            self.send('interface', Id, 'get_pdf', json_tex)
 
         if Type == "get_task_text" or Type == "get_task":
             json_text = []
@@ -277,7 +279,9 @@ class TexClient(AMQP_client):
             tex_lst = func(json_text, Type)
             for i in range(len(Data)):
                 Data[i].update({'json': json.dumps(tex_lst[i])})
+                Data[i].update({'raw': json.dumps(json_text[i])})
             self.send('interface', Id, 'tex_task_text', Data)
+
 
 
 client = TexClient('localhost', 'latex')
@@ -357,5 +361,3 @@ except KeyboardInterrupt:
 #     with open('output.tex', 'w') as tout:
 #         for i in tex_out:
 #             tout.write(i)
-
-
