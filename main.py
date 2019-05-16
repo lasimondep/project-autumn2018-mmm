@@ -161,7 +161,7 @@ def pdf_generate(doc, json_in, flag):
     pattern3 = r'table\d{,100}'
 
     for i in range(len(json_in)):
-        doc.append('\n\n\tЗадача' + str(i+1) + ':\n')
+        doc.append('~\n\n\tЗадача' + str(i+1) + ':\n')
         for key in json_in[i]['text']:
             match = re.fullmatch(pattern2, key)
             table1 = re.fullmatch(pattern3, key)

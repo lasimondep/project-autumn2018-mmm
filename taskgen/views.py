@@ -236,7 +236,7 @@ def download(request):
 		os.mkdir('temp', mode=0o777, dir_fd=None)
 	except FileExistsError:
 		pass
-	Data.generate_pdf(filepath='temp/' + filename)
+	Data.generate_pdf(filepath='./temp/' + filename)
 	filename = filename + '.pdf'
 	with open('./temp/' + filename, 'rb') as fin:
 		Data = fin.read()
