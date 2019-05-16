@@ -1,23 +1,21 @@
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'taskgen/style.css' %}">
+{% extends "./base.html" %}
 
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
-	<script type="text/javascript" async
-		src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
-	</script>
-	<script type="text/x-mathjax-config">
-		MathJax.Hub.Config({
-			tex2jax: {
-				inlineMath: [['$','$'], ['\\(','\\)']],
-				processEscapes: true
-			}
-		});
-	</script>
-</head>
-<body>
-<h1>Задачи для решения</h1>
+{% block extrahead %}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+<script type="text/x-mathjax-config">
+	MathJax.Hub.Config({
+		tex2jax: {
+			inlineMath: [['$','$'], ['\\(','\\)']],
+			processEscapes: true
+		}
+	});
+</script>
+{% endblock %}
+
+{% block title %}Задачи для решения{% endblock %}
+{% block content %}
 {% if types %}
 <form action="{% url 'taskgen:statements' %}", method='post'>
 {% csrf_token %}
@@ -38,7 +36,7 @@
 			{% endif %}
 		{% endfor %}
         </div>
-		<input type='submit' class="button" name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>
+		<input type='submit' class="btn btn-light sb-1" name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>
 		<br>
 	{% endfor %}
 	</div>
@@ -46,11 +44,8 @@
 </form>
 {% endif %}
 <form action="{% url 'taskgen:download' %}", method='post'>
-{% csrf_token %}
-<input type='hidden' name='statements_id', value='{{ statements_id }}'>
-<input type="submit" class="button" name="down_button" value="загрузить">
+	{% csrf_token %}
+	<input type='hidden' name='statements_id', value='{{ statements_id }}'>
+	<input type='submit' class="btn btn-dark lb-1" name='get_pdf' value='Скачать сборник'>
 </form>
-<div class = "home">
-	<a href="/">На главную</a>
-</div>
-</body>
+{% endblock %}

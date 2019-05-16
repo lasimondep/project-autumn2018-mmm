@@ -1,27 +1,12 @@
-{% load static %}
+{% extends "./base.html" %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'taskgen/style.css' %}">
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>Вход</title>
-<h1>Введите логин</h1>
-</head>
-<body>
+{% block title %}Вход в систему{% endblock %}
+{% block content %}
 <form method="post">
-{% csrf_token %}
-	<!-- as_p для того, чтобы каждый элемент формы был с новой строки -->
-	<input type="text" class="form1" name="username">
+	{% csrf_token %}
+	<input type="text" class="form1" name="username" >
 	<input type="password" class="form1" name="password">
-	<button type="submit" name="choizy" class="button">Войти</button>
+	<button type="submit" name="choizy" class="btn btn-success sb-1">Войти</button>
 </form>
-{{ x }}
-<div class = "home">
-    <a href="{% static 'taskgen/photo5386366040247740930.jpg' %}" download>click here</a>
-
-	<a href="/">На главную</a>
-</div>
-</body>
-
-</html>
+{{ error_msg }}
+{% endblock %}

@@ -1,15 +1,8 @@
-{% load static %}
+{% extends "./base.html" %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'taskgen/style.css' %}">
-
-<body>
-<div class = "pname">
-	<h1>Система автоматической генерации типовых примеров</h1>
-	<div class = "ricardo">
-		<a href = "http://math.spbu.ru/rus/" target="_blank"><img src="../../static/taskgen/mmm.png" alt="http://math.spbu.ru/rus/" height = 90px></a>
-	</div>
-</div>
-<div class = "col1">
+{% block title %}Система генерации типовых задач{% endblock %}
+{% block content %}
+<div class="col1">
 	<h2>Руководство пользователя</h2>
 	<p> 
 		Система генерации задач поможет вам подготовиться к тестированию самостоятельно! В меню справа выберите одну из двух доступных опций.
@@ -17,20 +10,8 @@
 		Если вам не хватает какого-то типа задач, вы можете сами написать и подключить генератор.
  	</p>
 </div>
-<div class = "col2">
-	<div class="kvasov-link">
-		<p style="text-align: center;"><a href="{% url 'taskgen:generate_list' %}">Посмотреть список задач, доступных для генерации</a></p>
-	</div>
-	<div class="kvasov-link">
-		<p style="text-align: center;"><a href="{% url 'taskgen:db_list' %}">Посмотреть список задач, сохраненных в базе</a></p>
-	</div>
-</div>
-<div class = "auth">
-	<a href = "{% url 'taskgen:my_view_reg' %}" target = "_blank"><p>Регистрация</p></a>
-	<a href = "{% url 'taskgen:my_view' %}" target = "_blank"><p>Вход</p></a>
-</div>
-<div class = "git_link">
-	<a href = "https://github.com/lasimondep/project-autumn2018-mmm" target = "_blank">
+<div class="git_link">
+	<a href="https://github.com/lasimondep/project-autumn2018-mmm" target="_blank">
 	<p>Проект на GitHub</p></a>
 </div>
-</body>
+{% endblock %}

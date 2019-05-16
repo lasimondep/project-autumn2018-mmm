@@ -17,18 +17,16 @@ import taskgen.communications as comm
 
 
 def my_view(request):
-    if request.method == 'POST' and "choizy" in request.POST:
+    if request.method == 'POST' and 'choizy' in request.POST:
         username = request.POST['username']
         password = request.POST['password']
-        print(password, username)
         user = authenticate(request, username=username, password=password)
-        print(user)
-        if user is not None:
-            login(request, user)
-            return render(request,"taskgen/index.html")
+        if user is None:
+            error_msg = 'Ошибка в имени пользователя и(или) пароле'
+            return render(request, 'taskgen/login.html', {'error_msg': error_msg})
         else:
-            x = 'wrong data'
-            return render(request, 'taskgen/login.html', {"x": x})
+            login(request, user)
+            return render(request, 'taskgen/index.html')
     else:
         return render(request, 'taskgen/login.html')
 
@@ -93,7 +91,7 @@ def statements(request):
     global statements_raw
     if get_from == 'facade' or get_from == 'db':
         tasks = list(request.POST.keys())[2:]
-        if 'checkbox' in request.POST.keys():
+        if 'hide_watched' in request.POST.keys():
             tasks = tasks[1:]
         tasks = list(filter(lambda x: int(request.POST[x]) > 0, tasks))
         tasks = [(int(x), int(request.POST[x])) for x in tasks]
@@ -107,7 +105,7 @@ def statements(request):
                 queryset = Task.objects.filter(
                     parent__pk=it[0],
                 )
-                if 'checkbox' in request.POST.keys():
+                if 'hide_watched' in request.POST.keys():
                     queryset = queryset.exclude(
                         user__username=request.user#
                     )
