@@ -7,6 +7,11 @@
 	<input type="text" class="form1" name="username" >
 	<input type="password" class="form1" name="password">
 	<button type="submit" name="choizy" class="btn btn-success sb-1">Войти</button>
+    {% if user.is_authenticated %}
+    <p>Вы вошли как {{ user.username }}</p>
+    <button type="submit" name="log" class="btn btn-success sb-1">Выйти</button>
+    {% endif %}
+
 </form>
 {{ error_msg }}
 {% endblock %}
