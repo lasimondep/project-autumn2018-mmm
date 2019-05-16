@@ -15,7 +15,7 @@ if len(va)==1:
 else:
     l = (va[1].split("="))[1]
     if is_int(l) and 8<int(l)<15:
-        n=int(l)
+        n=int(l)+1
     else:
         sys.exit("error")
 

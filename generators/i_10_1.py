@@ -13,12 +13,11 @@ if len(va)==1:
     N=n=random.randint(100,250) 
 else:
     l1 = (va[1].split("="))[1]
-    l2 = (va[2].split("="))[1]
-    if is_int(l1) and 4<=int(l1)<=6 and is_int(l2) and 100<=int(l2)<=250 :
+    if is_int(l1) and 4<=int(l1)<=6:
         n1=int(l1)
-        N=n=int(l2)
     else:
         sys.exit("error")
+N=n=random.randint(100,250) 
 ls=list("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЪЫЬЭЮЯ") 
 base=n1
 p=[] 
@@ -66,4 +65,4 @@ json_dict['answers'].update({"text1":["Ответ","insert2"]})
 json_dict['inserts'].update({"insert1":str(base)})
 json_dict['inserts'].update({"insert2":str(answer)})
 
-print(json_dict)
+print(json.dumps(json_dict))

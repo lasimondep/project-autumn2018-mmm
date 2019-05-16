@@ -64,22 +64,4 @@ json_dict['answers'].update({"text1":["Ответ","insert2"]})
 json_dict['inserts'].update({"insert1":str(base)})
 json_dict['inserts'].update({"insert2":str(N)})
 
-print(json_dict)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(json.dumps(json_dict))

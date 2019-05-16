@@ -1,17 +1,31 @@
 [{"title": "ЕГЭ", "content" : [
 	{"title": "Информатика", "content": [
+		{"task_id": "i5", "description": "Задача №5", "timeout": 1},
 		{"task_id": "i6", "description": "Задача №6", "timeout": 1},
+		{"title": "Задача №10", "content": [
+			{"task_id": "i10_1", "description": "Задача №10, подтип 1", "timeout": 1},
+			{"task_id": "i10_2", "description": "Задача №10, подтип 2", "timeout": 1}
+		]},
 		{"title": "Задача №11", "content": [
 			{"task_id": "i11_1", "description": "Задача №11, подтип 1", "timeout": 1},
-			{"task_id": "i11_2", "description": "Задача №11 подтип 2", "timeout": 1}
+			{"task_id": "i11_2", "description": "Задача №11, подтип 2", "timeout": 1}
+		]},
+		{"title": "Задача №19", "content": [
+			{"task_id": "i19_1", "description": "Задача №19, подтип 1", "timeout": 1},
+			{"task_id": "i19_2", "description": "Задача №19, подтип 2", "timeout": 1}
 		]},
 		{"task_id": "i25_1", "description": "Задача № 25", "timeout": 1}
 	]}
 ]},
 {
-	"i6": "./generators/6.py",
+	"i5": "./generators/i_5.py",
+	"i6": "./generators/i_6.py",
+	"i10_1": "./generators/i_10_1.py",
+	"i10_2": "./generators/i_10_2.py",
 	"i11_1": "./generators/i_11_1.py",
 	"i11_2": "./generators/i_11_2.py",
+	"i19_1": "./generators/i_19_1.py",
+	"i19_2": "./generators/i_19_2.py",
 	"i25_1": "./generators/i_25_1.py"
 },
 {

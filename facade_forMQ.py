@@ -16,7 +16,7 @@ def bfs(root):
 		else:
 			for c in node["content"]:
 				d.append(c)
-	return timeouts	
+	return timeouts
 
 
 with open("config.json", 'rb') as json_file:
@@ -28,35 +28,37 @@ with open("config.json", 'rb') as json_file:
 	timeouts = bfs(gen_tree)
 
 def get_CMD(task_id):
-	adr = gen_path[task_id]	 
+	adr = gen_path[task_id]
 	ext = Path(adr).suffix
 	cmd = pr_set[ext]   
 	cmd = cmd.replace("_FILE", adr)
 	return cmd
 
-		 
+ 
 
 def call_Generator(task_id, args = None):
-	cmd = gen_path[task_id] 
-	if(Path(cmd).exists()):
-		cmd = get_CMD(task_id)
-		if args != None:
-			cmd = cmd + args
-		try:
-			p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-			p.wait(timeout = timeouts[task_id])
-			_data = p.stdout.read()
-			_err = p.stderr.read()
-			if _err == b'':
-				return _data
-			else:
-				return None
-		except TimeoutExpired:
-			p.kill()
-			return None
-	else:
-		return None
-	
+    cmd = gen_path[task_id] 
+    if(Path(cmd).exists()):
+        cmd = get_CMD(task_id)
+        if args != None:
+            cmd = cmd + args
+        try:
+            p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            p.wait(timeout = timeouts[task_id])
+            _data = p.stdout.read()
+            _err = p.stderr.read()
+            print(_data)
+            print(_err)
+            if _err == b'':
+                return _data
+            else:
+                return None
+        except TimeoutExpired:
+            p.kill()
+            return None
+    else:
+        return None
+
 def get_arg(args):
 	if args != None:
 		arg = ""
@@ -85,28 +87,28 @@ def process_data(Data):
 			for i in range(req["count"]):
 				_from_gen = call_Generator(task_id)
 				if _from_gen != None:			#TODO: обработка ошибок???
-					_data.append({"task_id": task_id, "json" : _from_gen})	
+					_data.append({"task_id": task_id, "json" : _from_gen})
 	return _data
-	
-										  
-""" MyClient """																		 
+
+
+""" MyClient """
 
 class MyClient(AMQP_client):
 
 	def post_taskList(self, Id):
 		self.send('interface', Id, 'post_taskList', gen_tree)
-		   	
+
 	def post_task(self, Id, Type, Data):
 		_data = process_one(Data)
 		if _data != []:
 			self.send('latex', Id, 'get_task', _data)
 					
-	
+
 	def get_task_text(self, Id, Type, Data):
 		_data = process_data(Data)
 		if _data != []:
-			self.send('latex', Id, 'get_task_text', _data)	
-	
+			self.send('latex', Id, 'get_task_text', _data)
+
 	def parse(self, Id, Type, Data):
 		if Type == 'get_taskList':
 			self.post_taskList(Id)
