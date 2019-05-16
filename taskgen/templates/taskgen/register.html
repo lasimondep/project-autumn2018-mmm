@@ -9,4 +9,5 @@
 	<button type="submit" name="choizy" class="btn btn-dark mb-2">Зарегистрироваться</button>
 </form>
 <a href="{% url 'taskgen:my_view' %}" class="btn btn-dark sb-2 active" role = "button">Уже есть профиль?</a>
+        {{ user_check }}
 {% endblock %}

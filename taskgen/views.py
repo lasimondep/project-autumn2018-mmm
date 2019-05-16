@@ -3,7 +3,7 @@ from django.template.defaulttags import register
 from django.shortcuts import render
 from django.urls import reverse
 from collections import deque
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 import json
 import random
@@ -17,6 +17,9 @@ import taskgen.communications as comm
 
 
 def my_view(request):
+    if request.method == 'POST' and 'log' in request.POST:
+        logout(request)
+        return render(request, 'taskgen/index.html')
     if request.method == 'POST' and 'choizy' in request.POST:
         username = request.POST['username']
         password = request.POST['password']
@@ -33,6 +36,10 @@ def my_view(request):
 
 def my_view_reg(request):
     if request.method == 'POST' and "choizy" in request.POST:
+        username = request.POST['username']
+        if User.objects.filter(username=username).exists():
+            user_check = "Profile already exists"
+            return render(request, "taskgen/register.html", {"user_check":user_check})
         username = request.POST['username']
         password = request.POST['password']
         print(password, username)
