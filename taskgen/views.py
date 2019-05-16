@@ -37,6 +37,10 @@ def my_view(request):
 def my_view_reg(request):
     if request.method == 'POST' and "choizy" in request.POST:
         username = request.POST['username']
+        if User.objects.filter(username=username).exists():
+            user_check = "Profile already exists"
+            return render(request, "taskgen/register.html", {"user_check":user_check})
+        username = request.POST['username']
         password = request.POST['password']
         print(password, username)
         user = User.objects.create_user(username, None, password)
