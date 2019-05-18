@@ -31,11 +31,11 @@
 																													          <a class="nav-link" href="{% url 'taskgen:db_list' %}">Задачи из базы</a>
 																															        </li>
 																																	    					    </ul>
-			<form method="post">
+																																						    <form action="{% url 'taskgen:index'  %}" method="post">
             {% csrf_token %}
             {% if user.is_authenticated %}
             <p>{{ user.username }}</p>
-            <button type="submit" name="log" class="btn btn-success sb-1">Выйти</button>
+            <button type="submit" name="logout-button" class="btn btn-success sb-1">Выйти</button>
             {% endif %}
             </form>
 
