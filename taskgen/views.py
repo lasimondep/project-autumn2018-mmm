@@ -35,6 +35,9 @@ def my_view(request):
 
 
 def my_view_reg(request):
+    if request.method == 'POST' and 'log' in request.POST:
+        logout(request)
+        return render(request, 'taskgen/index.html')
     if request.method == 'POST' and "choizy" in request.POST:
         username = request.POST['username']
         if User.objects.filter(username=username).exists():
@@ -53,14 +56,23 @@ def my_view_reg(request):
 
 @register.filter
 def get_item(dictionary, key):
+    if request.method == 'POST' and 'log' in request.POST:
+        logout(request)
+        return render(request, 'taskgen/index.html')
     return dictionary.get(key)
 
 
 def index(request):
+    if request.method == 'POST' and 'log' in request.POST:
+        logout(request)
+        return render(request, 'taskgen/index.html')
     return render(request, 'taskgen/index.html')
 
 
 def generate_list(request):
+    if request.method == 'POST' and 'log' in request.POST:
+        logout(request)
+        return render(request, 'taskgen/index.html')
     try:
         Type, Data = comm.interface_client.send_request('facade', 'get_taskList')
     except comm.InterfaceClient.TimeOutExcept:
@@ -82,6 +94,9 @@ def generate_list(request):
 
 
 def db_list(request):
+    if request.method == 'POST' and 'log' in request.POST:
+        logout(request)
+        return render(request, 'taskgen/index.html')
     db_list = TaskType.objects.all()
     return render(request, 'taskgen/task_list.html', {'task_list': db_list, 'get_from': 'db'})
 
@@ -91,6 +106,9 @@ statements_raw = [] # Костыль2
 
 
 def statements(request):
+    if request.method == 'POST' and 'log' in request.POST:
+        logout(request)
+        return render(request, 'taskgen/index.html')
     if request.method != 'POST':
         return HttpResponseRedirect(reverse('taskgen:index'))
     get_from = request.POST['get_from']

@@ -31,11 +31,17 @@
 																													          <a class="nav-link" href="{% url 'taskgen:db_list' %}">Задачи из базы</a>
 																															        </li>
 																																	    					    </ul>
-																																						
+			<form method="post">
+            {% csrf_token %}
+            {% if user.is_authenticated %}
+            <p>{{ user.username }}</p>
+            <button type="submit" name="log" class="btn btn-success sb-1">Выйти</button>
+            {% endif %}
+            </form>
+
 			<a class="btn btn-dark btn-sm" style="margin-left : 44%;" href="{% url 'taskgen:my_view_reg' %}" target = "_blank" role="button">Регистрация</a>
 			<a class="btn btn-dark btn-sm" style=" margin-left : 2%;"href="{% url 'taskgen:my_view' %}" target = "_blank" role="button">Вход</a>	    
-
-																																					  </div>
+																																		  </div>
 </nav>
 {% block content %}
 {% endblock %}
