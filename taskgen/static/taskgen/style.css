@@ -1,12 +1,10 @@
-.form1{
+.form1 {
     border-radius: 4px;
-
-}
-.form2{
-    border-radius: 4px;
-
 }
 
+.form2 {
+    border-radius: 4px;
+}
 
 a:visited {
     color: #f3cc5a;
@@ -19,50 +17,28 @@ a:hover {
 a:active {
     color: #3b3b3b;
 }
+
 p {
-	font: 120% monospace;
+    font: 120% monospace;
     color: #222221;
 }
+
 .task_name {
     font: 150% monospace;
     background-color: #1c9675;
     padding: 5px;
     width: auto;
 }
-.pname {
-	text-align: center;
-	position: relative;
-	top: 0px;
-	width: auto;
-  	height: 90px;
-    background-image: url("fon_b.jpg");
-    overflow: auto;
-}
 
-.ricardo {
-
-	left: 0px;
-	position: absolute;
-	width: 110px;
-	top: 0px;
-	bottom: 0px;
-}
-
-.w_text{
-    margin-top: 10px;
-    padding: 10px;
-    padding-top: 5px;
-    background-color: #fab238;
-}
 .col1 {
     float: left;
     padding: 3%;
-
-	height: 50%;
+    height: 50%;
     margin-top: 5px;
-	margin-bottom: 10px;
-	background-color: #F6FBEF;
+    margin-bottom: 10px;
+    background-color: #F6FBEF;
 }
+
 .col3{
     position: relative;
     padding: 10px;
@@ -74,23 +50,7 @@ p {
     border-right: solid 1px #DBD6E0;
     background-color: #3b3b3b;
 }
-.col2{
-    padding: 1%;
-    position: relative;
-    border-left: solid 1px #DBD6E0;
-    margin-top: 10px;
-    margin-left: 49%;
-	height: 50%;
-    width: 51%;
-	margin-bottom: 1%;
-    background-color: #F6FBEF;
-}
-.nazvanie{
-	float: left;
-	margin-top: 0.3%;
-	margin-right: 3%;
-	padding: 5px;
-}
+
 .col4{
     position: relative;
     padding: 10px;
@@ -102,51 +62,16 @@ p {
     border: solid 1px #D6DBE0;
     background-color: #F6FBEF;
 }
+
+.nazvanie{
+    float: left;
+    margin-top: 0.3%;
+    margin-right: 3%;
+    padding: 5px;
+}
+
 .git_link{
     margin-left: 47%;
     position: absolute;
     bottom: 10px;
 }
-
-.zomg{
-	float: right;
-	width: 10px;
-	height: 10px;
-	margin-right: 10px;
-}
-
-#okno {
-	float: center;
-   	width: 512px;
-    height: 384px;
-    z-index: 1;
-    text-align: center;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: none;
-    background-image: url(C:\Users\Sentinel\Desktop\project-autumn2018-mmm-new_web_server\taskgen\static\taskgen\ricardo2.gif);
-    margin: auto;
-    }
-#okno span {
-   font: 200% monospace;
-   background-color: white;
-   text-align: center;
-   position: absolute;
-   bottom: 0;
-   right: 0;
-   left:0;
-}
-#okno close{
-	background-color: #DDDDDD;
-	position: absolute;
-	right: 0;
-	top: 0;
-}
-#okno:target {display: block;}
-
-
-
-

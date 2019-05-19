@@ -29,6 +29,7 @@
 	"i25_1": "./generators/i_25_1.py"
 },
 {
-	".py" : "python3 _FILE", ".exe" : "_FILE"
+	".py" : "python3 _FILE",
+	".exe" : "_FILE"
 }
 ]

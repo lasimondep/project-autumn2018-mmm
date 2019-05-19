@@ -1,56 +1,52 @@
 {% extends "./base.html" %}
 {% block extrahead %}
 <style>
-	.hide {display: none}
-	.hide:not(:checked) + * { display: none; }
-	.lhide {
-		display: inline-block;
-		padding: 1px 10px;
-		border-radius: 2px;
-		color: #fff;
-		background: #4e6473;
-		cursor: pointer;
-	}
+    .hide {display: none}
+    .hide:not(:checked) + * {display: none;}
+    .lhide {
+        display: inline-block;
+        padding: 1px 10px;
+        border-radius: 2px;
+        color: #fff;
+        background: #4e6473;
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
+
 {% block title %}Список задач{% endblock %}
+
 {% block content %}
 <h3>Доступные задачи</h3>
 Выберите категорию и впишите требуемое количество задач для
 {% if get_from == "facade" %}
-	генерации.
+    генерации.
 {% else %}
-	загрузки из базы данных.
+    загрузки из базы данных.
 {% endif %}
 {% load mptt_tags %}
-<form action="{% url 'taskgen:statements' %}", method='post'>
-{% csrf_token %}
-{% if get_from == "db" %}
-	Скрыть просмотренные задачи?
-	<input type="checkbox" name="hide_watched">
-{% endif %}
-<input type="hidden" name="get_from" value="{{ get_from }}">
-<ul>
-	{% recursetree task_list %}
-		<li>
-			{% if not node.is_leaf_node %}
-				<label for="hide{{ node.pk }}" class="lhide">{{ node.description }}</label>
-				{% if node.task_id %}
-					<input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0" class="form2">
-				{% endif %}
-				<input type="checkbox" id="hide{{ node.pk }}" class="hide">
-				<ul class="children">
-					{{ children }}
-				</ul>
-			{% else %}
-				{{ node.description }}
-				{% if node.task_id %}
-					<input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0">
-				{% endif %}
-			{% endif %}
-		</li>
-	{% endrecursetree %}
-</ul>
-<input type="submit" value="Загрузить выбранные" class="btn sb-1 btn-success" style="background-color:#1c9675;">
+<form action="{% url 'taskgen:statements' %}", method="post">
+    {% csrf_token %}
+    {% if get_from == "db" and user.is_authenticated %}
+        Скрыть просмотренные задачи?
+        <input type="checkbox" name="hide_watched">
+    {% endif %}
+    <input type="hidden" name="get_from" value="{{ get_from }}">
+    <ul>{% recursetree task_list %}
+        <li>{% if not node.is_leaf_node %}
+            <label for="hide{{ node.pk }}" class="lhide">{{ node.description }}</label>
+            {% if node.task_id %}
+                <input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0" class="form2">
+            {% endif %}
+            <input type="checkbox" id="hide{{ node.pk }}" class="hide">
+            <ul class="children">{{ children }}</ul>
+        {% else %}
+            {{ node.description }}
+            {% if node.task_id %}
+                <input style="width:auto" type="number" name="{{ node.pk }}" id="numt{{ node.pk }}" min="0" max="9" value="0">
+            {% endif %}
+        {% endif %}</li>
+    {% endrecursetree %}</ul>
+    <input type="submit" value="Загрузить выбранные" class="btn sb-1 btn-success" style="background-color:#1c9675;">
 </form>
 {% endblock %}

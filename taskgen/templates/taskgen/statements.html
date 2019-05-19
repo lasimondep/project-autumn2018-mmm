@@ -5,47 +5,45 @@
 <meta name="viewport" content="width=device-width">
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 <script type="text/x-mathjax-config">
-	MathJax.Hub.Config({
-		tex2jax: {
-			inlineMath: [['$','$'], ['\\(','\\)']],
-			processEscapes: true
-		}
-	});
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+            processEscapes: true
+        }
+    });
 </script>
 {% endblock %}
 
 {% block title %}Задачи для решения{% endblock %}
+
 {% block content %}
 {% if types %}
-<form action="{% url 'taskgen:statements' %}", method='post'>
-{% csrf_token %}
-<input type='hidden' name='get_from' value='{{ get_from }}'>
-<input type='hidden' name='statements_id', value='{{ statements_id }}'>
-{% for type in types %}
-    <div class = "col3">
-	<input type='hidden' name='savedata' value='{{ type }}'>
-        <div class = "task_name">	{{ type|get_item:"description" }}</div>
-	{% for tasks in type|get_item:"tasks" %}
-        <div class = "col4">
-		{% for word in tasks %}
-			{% if forloop.counter|divisibleby:"2" %}
-				<input type='checkbox' name='checkbox{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}' value='{{ forloop.counter }}'>
-				<input type='text' name='insert{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}' value='{{ word }}'>
-			{% else %}
-				{{ word|safe }}
-			{% endif %}
-		{% endfor %}
-        </div>
-		<input type='submit' class="btn btn-light sb-1" name='button{{ forloop.parentloop.counter }}.{{ forloop.counter }}' value='Поменять'>
-		<br>
-	{% endfor %}
-	</div>
-{% endfor %}
-</form>
+    <form action="{% url 'taskgen:statements' %}", method="post">
+        {% csrf_token %}
+        <input type="hidden" name="get_from" value="{{ get_from }}">
+        {% for type in types %}
+            <div class="col3">
+                <div class="task_name">	{{ type|get_item:"description" }}</div>
+                {% for tasks in type|get_item:"tasks" %}
+                    <div class="col4">
+                        {% for word in tasks %}
+                            {% if forloop.counter|divisibleby:"2" %}
+                                <input type="checkbox" name="checkbox{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}" value="{{ forloop.counter }}">
+                                <input type="text" name="insert{{ forloop.parentloop.parentloop.counter }}.{{ forloop.parentloop.counter }}" value="{{ word }}">
+                            {% else %}
+                                {{ word|safe }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <input type="submit" class="btn btn-light sb-1" name="button{{ forloop.parentloop.counter }}.{{ forloop.counter }}" value="Поменять">
+                    <br>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </form>
 {% endif %}
-<form action="{% url 'taskgen:download' %}", method='post'>
-	{% csrf_token %}
-	<input type='hidden' name='statements_id', value='{{ statements_id }}'>
-	<input type='submit' class="btn btn-dark lb-1" name='get_pdf' value='Скачать сборник'>
+<form action="{% url 'taskgen:download' %}", method="post">
+    {% csrf_token %}
+    <input type="submit" class="btn btn-dark lb-1" name="get_pdf" value="Скачать сборник">
 </form>
 {% endblock %}

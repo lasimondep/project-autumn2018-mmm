@@ -57,8 +57,3 @@ class Task(models.Model):
 
     def save_file(self, data):
         self.data_path.save('t' + str(self.pk) + '.json', ContentFile(data))
-
-class Statements(models.Model):
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    tasks = models.ManyToManyField(Task, blank=True)
