@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 import re
 from pylatex import *
@@ -15,7 +16,7 @@ def modify_str(str1, Type):
     flag = False
     flag1 = False
 
-    if Type == "get_task_text" or Type == "get_task":
+    if Type == 'get_task_text' or Type == 'get_task':
         str1 = str1.replace('%', '')
         str1 = str1.replace(r'\normalsize', '')
         str1_list = str1.splitlines()
@@ -47,7 +48,7 @@ def modify_str(str1, Type):
                 else:
                     temp_str += i + ' '
 
-    if Type == "get_pdf":
+    if Type == 'get_pdf':
         str1_list = str1.splitlines()
         for i in str1_list:
             if i == r'\begin{array}{|l|l|l|}%':
@@ -58,7 +59,7 @@ def modify_str(str1, Type):
                     flag = False
             interface_str += i + ' \n'
 
-    if Type == "post_task":
+    if Type == 'post_task':
         str1 = str1.replace('%', '')
         str1 = str1.replace(r'\newline', r'\\')
         str1 = str1.replace(r'\normalsize', '')
@@ -79,9 +80,9 @@ def func(data, Type):
     json_in = data
     flag = False
     tex = ''
-    geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+    geometry_options = {'tmargin': '2cm', 'lmargin': '2cm'}
 
-    if Type == "post_task":
+    if Type == 'post_task':
         doc = []
         tex = []
 
@@ -95,7 +96,7 @@ def func(data, Type):
             tex[i] = modify_str(tex[i], Type)
 
     elif Type == 'get_pdf':
-        geometry_options = {"tmargin": "2cm", "lmargin": "2cm"}
+        geometry_options = {'tmargin': '2cm', 'lmargin': '2cm'}
         doc = Document(geometry_options=geometry_options)
         doc.preamble.append(Command('usepackage[english, russian]', 'babel'))
         pdf_generate(doc, json_in, flag)
@@ -103,7 +104,7 @@ def func(data, Type):
         # tex = modify_str(tex, Type)
         # tex = doc.dumps()
 
-    elif Type == 'get_task_text' or Type == "get_task":
+    elif Type == 'get_task_text' or Type == 'get_task':
         doc = []
         tex = []
         for i in range(len(json_in)):
@@ -254,7 +255,7 @@ def fill_document(doc, json_in, flag):
 
 class TexClient(AMQP_client):
     def parse(self, Id, Type, Data):
-        if Type == "post_task":
+        if Type == 'post_task':
             json_out = {}
             tex_lst = []
             for i in range(len(Data)):
@@ -265,14 +266,14 @@ class TexClient(AMQP_client):
             json_out = json.dumps(json_out)
             self.send('interface', Id, 'post_tex', json_out)
 
-        if Type == "get_pdf":
+        if Type == 'get_pdf':
             tex_in = []
             for i in range(len(Data)):
                 tex_in.append(json.loads(Data[i]))
             json_tex = func(tex_in, Type)
             self.send('interface', Id, 'get_pdf', json_tex)
 
-        if Type == "get_task_text" or Type == "get_task":
+        if Type == 'get_task_text' or Type == 'get_task':
             json_text = []
             for index in range(len(Data)):
                 json_text.append(json.loads(Data[index]['json']))
@@ -286,13 +287,13 @@ class TexClient(AMQP_client):
 
 client = TexClient('localhost', 'latex')
 client.start_consume()
-print('I`m start')
+print('TeX started consuming')
 try:
     while True:
         pass
 except KeyboardInterrupt:
     client.stop_consume()
-    print("Close connection & stop thread")
+    print('Close connection & stop thread')
 
 
 # if __name__ == '__main__':
@@ -313,8 +314,8 @@ except KeyboardInterrupt:
 #                 },
 #          'inserts':{'insert1':'12', 'insert2':'23', 'insert3':'24', 'insert4':'34', 'insert5':'12', 'insert6':'4', 'insert7':'2', 'insert8':'22'},
 #          'answers':{'table1':{'row1':{'col1':['k := 0;\n for i:=0 to n-2 do\n  if ((a[i]*a[i+1]) ', 'insert5', ') and (a[i]+a[i+1] ', 'insert6', ') then\n    k := k + 1;\nwriteln(k);'],
-#                                       'col2':["k = 0\nfor i in range(n-1)\n  if ((a[i]*a[i+1]) ", 'insert7', ") and (a[i]+a[i+1] ", 'insert8', ")):\n    k += 1\nprint(k)"],
-#                                       'col3':["k = 0;\nfor(i=0;i<n-1;i++)\n  if ((a[i]*a[i+1]) ", 'insert7', " && (a[i]+a[i+1]", 'insert8', "))\n    k ++;\nprintf(\"%d\", k);"]
+#                                       'col2':['k = 0\nfor i in range(n-1)\n  if ((a[i]*a[i+1]) ', 'insert7', ') and (a[i]+a[i+1] ', 'insert8', ')):\n    k += 1\nprint(k)'],
+#                                       'col3':['k = 0;\nfor(i=0;i<n-1;i++)\n  if ((a[i]*a[i+1]) ', 'insert7', ' && (a[i]+a[i+1]', 'insert8', '))\n    k ++;\nprintf(\"%d\", k);']
 #                                      }
 #                              }
 #                     }
@@ -330,7 +331,7 @@ except KeyboardInterrupt:
 #
 #
 #
-#     # Type = "get_task_text"
+#     # Type = 'get_task_text'
 #     #
 #     # for index in range(len(json_in)):
 #     #     json_text.append(json_in[index]['json'])
@@ -349,7 +350,7 @@ except KeyboardInterrupt:
 #     #             tex_out.write(line)
 #     #             tex_out.write('\n')
 #
-#     Type = "get_pdf"
+#     Type = 'get_pdf'
 #     tex_out = func(json_text, Type)
 #     # json_out = json.dumps(tex_out)
 #     print(tex_out)

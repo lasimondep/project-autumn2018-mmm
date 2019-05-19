@@ -3,11 +3,11 @@
 {% block title %}Регистрация в системе{% endblock %}
 {% block content %}
 <form method="post">
-	{% csrf_token %}
-	<input type="text" class="form1" name="username" placeholder="Логин" required pattern="[0-9a-zA-Z]{4,20}">
-	<input type="password" class="form1" name="password" placeholder="Пароль" required pattern="\S{6,}">
-	<button type="submit" name="choizy" class="btn btn-dark mb-2">Зарегистрироваться</button>
+    {% csrf_token %}
+    <input type="text" class="form1" name="username" placeholder="Логин" required pattern="[0-9a-zA-Z]{4,20}">
+    <input type="password" class="form1" name="password" placeholder="Пароль" required pattern="\S{6,}">
+    <button type="submit" name="register-button" class="btn btn-dark mb-2">Зарегистрироваться</button>
 </form>
-<a href="{% url 'taskgen:my_view' %}" class="btn btn-dark sb-2 active" role = "button">Уже есть профиль?</a>
-        {{ user_check }}
+<a href="{% url 'taskgen:login' %}" class="btn btn-dark sb-2 active" role="button">Уже есть профиль?</a>
+{{ user_check }}
 {% endblock %}

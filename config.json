@@ -2,10 +2,6 @@
 	{"title": "Информатика", "content": [
 		{"task_id": "i5", "description": "Задача №5", "timeout": 1},
 		{"task_id": "i6", "description": "Задача №6", "timeout": 1},
-		{"title": "Задача №9", "content": [
-			{"task_id": "i9_1", "description": "Задача №9, подтип 1", "timeout": 1},
-			{"task_id": "i9_2", "description": "Задача №9, подтип 2", "timeout": 1}
-		]},
 		{"title": "Задача №10", "content": [
 			{"task_id": "i10_1", "description": "Задача №10, подтип 1", "timeout": 1},
 			{"task_id": "i10_2", "description": "Задача №10, подтип 2", "timeout": 1}
@@ -14,8 +10,6 @@
 			{"task_id": "i11_1", "description": "Задача №11, подтип 1", "timeout": 1},
 			{"task_id": "i11_2", "description": "Задача №11, подтип 2", "timeout": 1}
 		]},
-		{"task_id": "i13", "description": "Задача №13", "timeout": 1},
-		{"task_id": "i14", "description": "Задача №14", "timeout": 1},
 		{"title": "Задача №19", "content": [
 			{"task_id": "i19_1", "description": "Задача №19, подтип 1", "timeout": 1},
 			{"task_id": "i19_2", "description": "Задача №19, подтип 2", "timeout": 1}
@@ -26,19 +20,16 @@
 {
 	"i5": "./generators/i_5.py",
 	"i6": "./generators/i_6.py",
-	"i9_1": "./generators/i_9_1.bin",
-	"i9_2": "./generators/i_9_2.bin",
 	"i10_1": "./generators/i_10_1.py",
 	"i10_2": "./generators/i_10_2.py",
 	"i11_1": "./generators/i_11_1.py",
 	"i11_2": "./generators/i_11_2.py",
-	"i13": "./generators/i_13.bin",
-	"i14": "./generators/i_14.bin",
 	"i19_1": "./generators/i_19_1.py",
 	"i19_2": "./generators/i_19_2.py",
 	"i25_1": "./generators/i_25_1.py"
 },
 {
-	".py" : "python3 _FILE", ".bin" : "_FILE"
+	".py" : "python3 _FILE",
+	".bin" : "_FILE"
 }
 ]

@@ -5,10 +5,8 @@ from django.urls import reverse
 from collections import deque
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-import json
-import random
-import os
-import pylatex
+
+import json, random, os, pylatex
 
 from .models import TaskTree, TaskType, Task
 import taskgen.communications as comm
@@ -16,11 +14,13 @@ import taskgen.communications as comm
 # Create your views here.
 
 
-def my_view(request):
-    if request.method == 'POST' and 'log' in request.POST:
-        logout(request)
-        return render(request, 'taskgen/index.html')
-    if request.method == 'POST' and 'choizy' in request.POST:
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+def login_view(request):
+    if 'login-button' in request.POST:
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
@@ -29,34 +29,31 @@ def my_view(request):
             return render(request, 'taskgen/login.html', {'error_msg': error_msg})
         else:
             login(request, user)
-            return render(request, 'taskgen/index.html')
+            return HttpResponseRedirect(reverse('taskgen:index'))
     else:
         return render(request, 'taskgen/login.html')
 
 
-def my_view_reg(request):
-    if request.method == 'POST' and "choizy" in request.POST:
+def register_view(request):
+    if 'register-button' in request.POST:
         username = request.POST['username']
         if User.objects.filter(username=username).exists():
-            user_check = "Profile already exists"
-            return render(request, "taskgen/register.html", {"user_check":user_check})
+            user_check = 'Пользователь уже существует'
+            return render(request, 'taskgen/register.html', {'user_check':user_check})
         username = request.POST['username']
         password = request.POST['password']
         print(password, username)
         user = User.objects.create_user(username, None, password)
         user.save()
         print(user)
-        return render(request, "taskgen/index.html")
+        return HttpResponseRedirect(reverse('taskgen:index'))
     else:
         return render(request, 'taskgen/register.html')
 
 
-@register.filter
-def get_item(dictionary, key):
-    return dictionary.get(key)
-
-
 def index(request):
+    if 'logout-button' in request.POST:
+        logout(request)
     return render(request, 'taskgen/index.html')
 
 
@@ -86,27 +83,24 @@ def db_list(request):
     return render(request, 'taskgen/task_list.html', {'task_list': db_list, 'get_from': 'db'})
 
 
-statements_list = [] # Костыль
-statements_raw = [] # Костыль2
+def debug_statements(request):
+    request.session.setdefault('rand', random.random())
+    return render(request, 'taskgen/debug.html', {'debug': str(request.session.items())})
+
 
 
 def statements(request):
     if request.method != 'POST':
         return HttpResponseRedirect(reverse('taskgen:index'))
     get_from = request.POST['get_from']
-    global statements_list
-    global statements_raw
     if get_from == 'facade' or get_from == 'db':
         tasks = list(request.POST.keys())[2:]
         if 'hide_watched' in request.POST.keys():
             tasks = tasks[1:]
         tasks = list(filter(lambda x: int(request.POST[x]) > 0, tasks))
         tasks = [(int(x), int(request.POST[x])) for x in tasks]
-        statements_id = len(statements_list)
-        statements_list.append([])
-        statements_raw.append([])
-        statements_nraw = statements_raw[statements_id]
-        statements_output = statements_list[statements_id]
+        statements_output = request.session['statements'] = []
+        statements_nraw = request.session['statements_raw'] = []
         if get_from == 'db':
             for it in tasks:
                 queryset = Task.objects.filter(
@@ -114,7 +108,7 @@ def statements(request):
                 )
                 if 'hide_watched' in request.POST.keys():
                     queryset = queryset.exclude(
-                        user__username=request.user#
+                        user__username=request.user
                     )
                 res = list(queryset)
                 random.shuffle(res)
@@ -180,21 +174,16 @@ def statements(request):
                         task_new = Task.objects.create(parent=task_type)
                         task_new.save_file(json.dumps(one_task['text']))
                         task_new.save_raw(json.dumps(one_task['raw']))
-        return render(request, 'taskgen/statements.html', {'types': statements_output, 'get_from': 'change', 'statements_id': statements_id})
+        return render(request, 'taskgen/statements.html', {'types': statements_output, 'get_from': 'change'})
     if get_from == 'change':
         POST_dict = dict(request.POST)
-        statements_id = int(POST_dict['statements_id'][0])
-        statements_output = statements_list[statements_id]
-        statements_nraw = statements_raw[statements_id]
+        statements_output = request.session['statements']
+        statements_nraw = request.session['statements_raw']
         selected_task = str(list(filter(lambda x: x.startswith('button'), POST_dict.keys()))[0])[6:]
         selected_type, selected_num = map(lambda x: int(x) - 1, selected_task.split('.'))
         task_id = statements_output[selected_type]['task_id']
-        changed_list = POST_dict.get('checkbox' + selected_task)
-        insert_list = POST_dict.get('insert' + selected_task)
-        if changed_list == None:
-            changed_list = []
-        if insert_list == None:
-            insert_list = []
+        changed_list = POST_dict.get('checkbox' + selected_task, [])
+        insert_list = POST_dict.get('insert' + selected_task, [])
         changed_list = list(map(lambda x: int(x) // 2, changed_list))
         gen_request = []
         it = 1
@@ -215,26 +204,20 @@ def statements(request):
         else:
             statements_output[selected_type]['tasks'][selected_num] = json.loads(Data[0]['json'])
             statements_nraw[selected_type][selected_num] = json.loads(Data[0]['raw'])
-        return render(request, 'taskgen/statements.html', {'types': statements_output, 'get_from': 'change', 'statements_id': statements_id})
+        return render(request, 'taskgen/statements.html', {'types': statements_output, 'get_from': 'change'})
 
 
 def download(request):
     if request.method != 'POST':
         return HttpResponseRedirect(reverse('taskgen:index'))
-    if request.user.is_authenticated:
-        currentuser = User.objects.get(username=request.user)
-    else:
-        return HttpResponseRedirect(reverse('taskgen:my_view'))
-    statements_id = int(request.POST['statements_id'][0])
-    print('\nStatements id =', statements_id)
-    statements_input = statements_raw[statements_id]
+    statements_input = request.session['statements_raw']
     doc_request = []
     for it in statements_input:
         doc_request.extend(list(map(lambda x: json.dumps(x), it)))
     try:
         Type, Data = comm.interface_client.send_request('latex', 'get_pdf', Data=doc_request, timeout=2)
     except comm.InterfaceClient.TimeOutExcept:
-        return HttpResponse('Tex модуль временно недоступен')
+        return HttpResponse('TeX модуль временно недоступен')
     filename = 'td' + str(random.randint(10000, 99999))
     try:
         os.mkdir('temp', mode=0o777, dir_fd=None)
