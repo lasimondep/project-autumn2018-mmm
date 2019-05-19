@@ -25,13 +25,12 @@
     загрузки из базы данных.
 {% endif %}
 {% load mptt_tags %}
-<form action="{% url 'taskgen:statements' %}", method="post">
+<form action="{% url 'taskgen:statements' %}"method="post">
     {% csrf_token %}
     {% if get_from == "db" and user.is_authenticated %}
         Скрыть просмотренные задачи?
         <input type="checkbox" name="hide_watched">
     {% endif %}
-    <input type="hidden" name="get_from" value="{{ get_from }}">
     <ul>{% recursetree task_list %}
         <li>{% if not node.is_leaf_node %}
             <label for="hide{{ node.pk }}" class="lhide">{{ node.description }}</label>

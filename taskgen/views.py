@@ -42,10 +42,8 @@ def register_view(request):
             return render(request, 'taskgen/register.html', {'user_check':user_check})
         username = request.POST['username']
         password = request.POST['password']
-        print(password, username)
         user = User.objects.create_user(username, None, password)
         user.save()
-        print(user)
         return HttpResponseRedirect(reverse('taskgen:index'))
     else:
         return render(request, 'taskgen/register.html')
@@ -59,45 +57,62 @@ def index(request):
 
 def generate_list(request):
     try:
-        Type, Data = comm.interface_client.send_request('facade', 'get_taskList')
+        Type, Data = comm.interface_client.send_request('facade', 'get_taskList', timeout=0.2)
     except comm.InterfaceClient.TimeOutExcept:
         return HttpResponse('Фасад временно недоступен')
+    tree = list(TaskTree.objects.all())
+    if len(tree) > 0:
+        root_node = tree[0]
     else:
-        TaskTree.objects.all().delete()
-        tree = TaskTree.objects.create(description=Data['title'])
-        bfs_queue = deque()
-        bfs_queue.append((Data, tree))
-        while len(bfs_queue) > 0:
-            node, parent = bfs_queue.popleft()
-            for it in node['content']:
-                if 'title' in it.keys():
-                    bfs_queue.append((it, TaskTree.objects.create(description=it['title'], parent=parent)))
-                else:
+        root_node = TaskTree.objects.create(description=Data['title'])
+    bfs_queue = deque()
+    bfs_queue.append((Data, root_node))
+    while len(bfs_queue) > 0:
+        node, parent = bfs_queue.popleft()
+        deleting_node = list(filter(lambda x: x.parent == parent, tree))
+        for it in node['content']:
+            if 'title' in it.keys():
+                deleting_node = list(filter(lambda x: x.description != it['title'], deleting_node))
+                try:
+                    next_node = list(filter(lambda x: x.parent == parent and x.description == it['title'], tree))[0]
+                except IndexError:
+                    next_node = TaskTree.objects.create(description=it['title'], parent=parent)
+                bfs_queue.append((it, next_node))
+            else:
+                deleting_node = list(filter(lambda x: x.task_id != it['task_id'], deleting_node))
+                if len(list(filter(lambda x: x.parent == parent and x.task_id == it['task_id'], tree))) == 0:
                     TaskTree.objects.create(description=it['description'], task_id=it['task_id'], parent=parent, task_timeout=it['timeout'])
+        for it in deleting_node[::-1]:
+            it.delete()
     tree = TaskTree.objects.all()
+    request.session['get_from'] = 'facade'
     return render(request, 'taskgen/task_list.html', {'task_list': tree, 'get_from': 'facade'})
 
 
 def db_list(request):
     db_list = TaskType.objects.all()
+    request.session['get_from'] = 'db'
     return render(request, 'taskgen/task_list.html', {'task_list': db_list, 'get_from': 'db'})
 
 
 def debug_statements(request):
-    request.session.setdefault('rand', random.random())
-    return render(request, 'taskgen/debug.html', {'debug': str(request.session.items())})
-
+    return render(request, 'taskgen/debug.html', {'debug': str(request.META)})
 
 
 def statements(request):
     if request.method != 'POST':
         return HttpResponseRedirect(reverse('taskgen:index'))
-    get_from = request.POST['get_from']
+    get_from = request.session['get_from']
     if get_from == 'facade' or get_from == 'db':
-        tasks = list(request.POST.keys())[2:]
+        tasks = list(request.POST.keys())[1:]
         if 'hide_watched' in request.POST.keys():
             tasks = tasks[1:]
         tasks = list(filter(lambda x: int(request.POST[x]) > 0, tasks))
+        if len(tasks) == 0:
+            if get_from == 'facade':
+                return HttpResponseRedirect(reverse('taskgen:generate_list'))
+            else:
+                return HttpResponseRedirect(reverse('taskgen:db_list'))
         tasks = [(int(x), int(request.POST[x])) for x in tasks]
         statements_output = request.session['statements'] = []
         statements_nraw = request.session['statements_raw'] = []
@@ -128,7 +143,6 @@ def statements(request):
                 res = TaskTree.objects.get(pk=it[0])
                 timeout += res.task_timeout * it[1]
                 gen_request.append({'task_id': res.task_id, 'count': it[1]})
-            print('\ngen_request =', gen_request, '\n')
             try:
                 Type, Data = comm.interface_client.send_request('facade', 'get_task_text', Data=gen_request, timeout=timeout)
             except comm.InterfaceClient.TimeOutExcept:
@@ -174,7 +188,8 @@ def statements(request):
                         task_new = Task.objects.create(parent=task_type)
                         task_new.save_file(json.dumps(one_task['text']))
                         task_new.save_raw(json.dumps(one_task['raw']))
-        return render(request, 'taskgen/statements.html', {'types': statements_output, 'get_from': 'change'})
+        request.session['get_from'] = 'change'
+        return render(request, 'taskgen/statements.html', {'types': statements_output})
     if get_from == 'change':
         POST_dict = dict(request.POST)
         statements_output = request.session['statements']

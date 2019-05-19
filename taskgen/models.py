@@ -16,7 +16,7 @@ class TaskTree(MPTTModel):
     task_timeout = models.FloatField('timeout', null=True, blank=True)
 
     class MPTTMeta:
-        order_insertion_by = ['-level']
+        order_insertion_by = ['description', '-level']
 
     def __str__(self):
         return self.description
@@ -29,7 +29,7 @@ class TaskType(MPTTModel):
     task_id = models.CharField('task_id', max_length=200, null=True, blank=True)
 
     class MPTTMeta:
-        order_insertion_by = ['-level']
+        order_insertion_by = ['description', '-level']
 
     def __str__(self):
         return self.description
